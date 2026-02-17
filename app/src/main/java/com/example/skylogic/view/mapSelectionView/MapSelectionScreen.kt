@@ -1,4 +1,4 @@
-package com.example.skylogic.view.mapSelectionScreen
+package com.example.skylogic.view.mapSelectionView
 
 import android.content.Context
 import org.osmdroid.config.Configuration
@@ -34,46 +34,35 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.skylogic.models.Screen
-import com.example.skylogic.view.settingView.SettingsViewModel
+import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.models.GeoResponse
-import com.example.skylogic.view.weatherView.WeatherViewModel
+import com.example.skylogic.view.mapSelectionView.mapSelectionViewModel.MapSelectionViewModel
+import com.example.skylogic.view.mapSelectionView.mapSelectionViewModel.MapSelectionViewModelFactory
+import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun MapSelectionScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel,
-    viewModel: WeatherViewModel
+    weatherViewModel: WeatherViewModel
 ) {
 
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+
+    val mapViewModel: MapSelectionViewModel = viewModel(
+        factory = MapSelectionViewModelFactory(weatherViewModel)
+    )
+
+    val searchQuery by mapViewModel.searchQuery.collectAsState()
+    val suggestions by mapViewModel.suggestions.collectAsState()
 
     var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
     var marker by remember { mutableStateOf<Marker?>(null) }
-    var searchQuery by remember { mutableStateOf("") }
     var mapView by remember { mutableStateOf<MapView?>(null) }
-    var suggestions by remember { mutableStateOf<List<GeoResponse>>(emptyList()) }
-
-    LaunchedEffect(searchQuery) {
-
-        if (searchQuery.length < 2) {
-            suggestions = emptyList()
-            return@LaunchedEffect
-        }
-
-        delay(400)
-
-        try {
-            val result = viewModel.getCityCoordinates(searchQuery)
-            suggestions = result
-        } catch (e: Exception) {
-            suggestions = emptyList()
-        }
-    }
 
     Box(Modifier.fillMaxSize()) {
 
@@ -93,60 +82,48 @@ fun MapSelectionScreen(
                     CustomZoomButtonsController.Visibility.ALWAYS
                 )
 
-                val controller = mv.controller
-                controller.setZoom(5.0)
-                controller.setCenter(GeoPoint(30.0444, 31.2357))
-                val mapEventsReceiver = object : MapEventsReceiver {
+                mv.controller.setZoom(5.0)
+                mv.controller.setCenter(GeoPoint(30.0444, 31.2357))
+
+                val receiver = object : MapEventsReceiver {
 
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
 
                         p?.let { geoPoint ->
-
                             selectedPoint = geoPoint
 
-                            coroutineScope.launch {
+                            mapViewModel.reverseGeocode(
+                                geoPoint.latitude,
+                                geoPoint.longitude
+                            ) { cityName ->
 
-                                try {
-                                    val result = viewModel.reverseGeocode(
-                                        geoPoint.latitude,
-                                        geoPoint.longitude
-                                    )
+                                marker?.let { mv.overlays.remove(it) }
 
-                                    val cityName =
-                                        if (result.isNotEmpty())
-                                            result[0].name
-                                        else
-                                            "Selected Location"
+                                val newMarker = Marker(mv)
+                                newMarker.position = geoPoint
+                                newMarker.setAnchor(
+                                    Marker.ANCHOR_CENTER,
+                                    Marker.ANCHOR_BOTTOM
+                                )
+                                newMarker.title = cityName
+                                newMarker.showInfoWindow()
 
-                                    marker?.let { mv.overlays.remove(it) }
-
-                                    val newMarker = Marker(mv)
-                                    newMarker.position = geoPoint
-                                    newMarker.setAnchor(
-                                        Marker.ANCHOR_CENTER,
-                                        Marker.ANCHOR_BOTTOM
-                                    )
-                                    newMarker.title = cityName
-                                    newMarker.showInfoWindow()
-
-                                    mv.overlays.add(newMarker)
-                                    marker = newMarker
-                                    mv.invalidate()
-
-                                } catch (_: Exception) {}
+                                mv.overlays.add(newMarker)
+                                marker = newMarker
+                                mv.invalidate()
                             }
                         }
-
                         return true
                     }
 
                     override fun longPressHelper(p: GeoPoint?) = false
                 }
 
-                mv.overlays.add(MapEventsOverlay(mapEventsReceiver))
+                mv.overlays.add(MapEventsOverlay(receiver))
                 mv
             }
         )
+
         Column(
             Modifier
                 .align(Alignment.TopCenter)
@@ -155,7 +132,7 @@ fun MapSelectionScreen(
 
             TextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { mapViewModel.onSearchQueryChanged(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Search city...") },
                 shape = RoundedCornerShape(20.dp)
@@ -167,7 +144,6 @@ fun MapSelectionScreen(
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(8.dp)
                 ) {
-
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -186,9 +162,7 @@ fun MapSelectionScreen(
                                             GeoPoint(city.lat, city.lon)
 
                                         selectedPoint = geoPoint
-                                        searchQuery =
-                                            "${city.name}, ${city.country}"
-                                        suggestions = emptyList()
+                                        mapViewModel.clearSuggestions()
 
                                         mapView?.controller?.animateTo(geoPoint)
                                         mapView?.controller?.setZoom(12.0)
@@ -213,17 +187,16 @@ fun MapSelectionScreen(
                                     }
                                     .padding(14.dp)
                             )
-
                             Divider()
                         }
                     }
                 }
             }
         }
+
         Button(
             onClick = {
                 selectedPoint?.let {
-
                     settingsViewModel.setCustomLocation(
                         it.latitude,
                         it.longitude
@@ -244,4 +217,207 @@ fun MapSelectionScreen(
         }
     }
 }
+
+//@Composable
+//fun MapSelectionScreen(
+//    navController: NavController,
+//    settingsViewModel: SettingsViewModel,
+//    viewModel: WeatherViewModel
+//) {
+//
+//    val context = LocalContext.current
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
+//    var marker by remember { mutableStateOf<Marker?>(null) }
+//    var searchQuery by remember { mutableStateOf("") }
+//    var mapView by remember { mutableStateOf<MapView?>(null) }
+//    var suggestions by remember { mutableStateOf<List<GeoResponse>>(emptyList()) }
+//
+//    LaunchedEffect(searchQuery) {
+//
+//        if (searchQuery.length < 2) {
+//            suggestions = emptyList()
+//            return@LaunchedEffect
+//        }
+//
+//        delay(400)
+//
+//        try {
+//            val result = viewModel.getCityCoordinates(searchQuery)
+//            suggestions = result
+//        } catch (e: Exception) {
+//            suggestions = emptyList()
+//        }
+//    }
+//
+//    Box(Modifier.fillMaxSize()) {
+//
+//        AndroidView(
+//            modifier = Modifier.fillMaxSize(),
+//            factory = {
+//
+//                Configuration.getInstance()
+//                    .load(context, context.getSharedPreferences("osm", Context.MODE_PRIVATE))
+//
+//                val mv = MapView(context)
+//                mapView = mv
+//
+//                mv.setTileSource(TileSourceFactory.MAPNIK)
+//                mv.setMultiTouchControls(true)
+//                mv.zoomController.setVisibility(
+//                    CustomZoomButtonsController.Visibility.ALWAYS
+//                )
+//
+//                val controller = mv.controller
+//                controller.setZoom(5.0)
+//                controller.setCenter(GeoPoint(30.0444, 31.2357))
+//                val mapEventsReceiver = object : MapEventsReceiver {
+//
+//                    override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+//
+//                        p?.let { geoPoint ->
+//
+//                            selectedPoint = geoPoint
+//
+//                            coroutineScope.launch {
+//
+//                                try {
+//                                    val result = viewModel.reverseGeocode(
+//                                        geoPoint.latitude,
+//                                        geoPoint.longitude
+//                                    )
+//
+//                                    val cityName =
+//                                        if (result.isNotEmpty())
+//                                            result[0].name
+//                                        else
+//                                            "Selected Location"
+//
+//                                    marker?.let { mv.overlays.remove(it) }
+//
+//                                    val newMarker = Marker(mv)
+//                                    newMarker.position = geoPoint
+//                                    newMarker.setAnchor(
+//                                        Marker.ANCHOR_CENTER,
+//                                        Marker.ANCHOR_BOTTOM
+//                                    )
+//                                    newMarker.title = cityName
+//                                    newMarker.showInfoWindow()
+//
+//                                    mv.overlays.add(newMarker)
+//                                    marker = newMarker
+//                                    mv.invalidate()
+//
+//                                } catch (_: Exception) {}
+//                            }
+//                        }
+//
+//                        return true
+//                    }
+//
+//                    override fun longPressHelper(p: GeoPoint?) = false
+//                }
+//
+//                mv.overlays.add(MapEventsOverlay(mapEventsReceiver))
+//                mv
+//            }
+//        )
+//        Column(
+//            Modifier
+//                .align(Alignment.TopCenter)
+//                .padding(16.dp)
+//        ) {
+//
+//            TextField(
+//                value = searchQuery,
+//                onValueChange = { searchQuery = it },
+//                modifier = Modifier.fillMaxWidth(),
+//                placeholder = { Text("Search city...") },
+//                shape = RoundedCornerShape(20.dp)
+//            )
+//
+//            if (suggestions.isNotEmpty()) {
+//
+//                Card(
+//                    shape = RoundedCornerShape(16.dp),
+//                    elevation = CardDefaults.cardElevation(8.dp)
+//                ) {
+//
+//                    LazyColumn(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .heightIn(max = 300.dp)
+//                    ) {
+//
+//                        items(suggestions) { city ->
+//
+//                            Text(
+//                                text = "${city.name}, ${city.country}",
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .clickable {
+//
+//                                        val geoPoint =
+//                                            GeoPoint(city.lat, city.lon)
+//
+//                                        selectedPoint = geoPoint
+//                                        searchQuery =
+//                                            "${city.name}, ${city.country}"
+//                                        suggestions = emptyList()
+//
+//                                        mapView?.controller?.animateTo(geoPoint)
+//                                        mapView?.controller?.setZoom(12.0)
+//
+//                                        marker?.let {
+//                                            mapView?.overlays?.remove(it)
+//                                        }
+//
+//                                        val newMarker = Marker(mapView)
+//                                        newMarker.position = geoPoint
+//                                        newMarker.setAnchor(
+//                                            Marker.ANCHOR_CENTER,
+//                                            Marker.ANCHOR_BOTTOM
+//                                        )
+//                                        newMarker.title =
+//                                            "${city.name}, ${city.country}"
+//                                        newMarker.showInfoWindow()
+//
+//                                        mapView?.overlays?.add(newMarker)
+//                                        marker = newMarker
+//                                        mapView?.invalidate()
+//                                    }
+//                                    .padding(14.dp)
+//                            )
+//
+//                            Divider()
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        Button(
+//            onClick = {
+//                selectedPoint?.let {
+//
+//                    settingsViewModel.setCustomLocation(
+//                        it.latitude,
+//                        it.longitude
+//                    )
+//                    settingsViewModel.setLocationMode("Map")
+//                    navController.navigate(Screen.Home.route)
+//                }
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .padding(20.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = Color(0xFF00C853)
+//            ),
+//            shape = RoundedCornerShape(16.dp)
+//        ) {
+//            Text("Confirm Location", color = Color.White)
+//        }
+//    }
+//}
 
