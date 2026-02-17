@@ -1,4 +1,4 @@
-package com.example.skylogic
+package com.example.skylogic.view.mapSelectionScreen
 
 import android.content.Context
 import org.osmdroid.config.Configuration
@@ -34,7 +34,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import com.example.skylogic.models.Screen
+import com.example.skylogic.view.settingView.SettingsViewModel
 import com.example.skylogic.models.GeoResponse
+import com.example.skylogic.view.weatherView.WeatherViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
