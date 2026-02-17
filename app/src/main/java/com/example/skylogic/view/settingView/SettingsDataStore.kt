@@ -1,4 +1,4 @@
-package com.example.skylogic
+package com.example.skylogic.view.settingView
 
 
 import android.content.Context
