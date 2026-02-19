@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         CachedWeatherEntity::class,
         CachedForecastEntity::class
     ],
-    version = 3
+    version = 4
 )
 
 abstract class AppDatabase : RoomDatabase() {
