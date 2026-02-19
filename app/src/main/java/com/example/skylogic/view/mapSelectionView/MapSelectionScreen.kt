@@ -38,17 +38,18 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.skylogic.models.Screen
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
-import com.example.skylogic.models.GeoResponse
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.mapSelectionView.mapSelectionViewModel.MapSelectionViewModel
 import com.example.skylogic.view.mapSelectionView.mapSelectionViewModel.MapSelectionViewModelFactory
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+
 
 @Composable
 fun MapSelectionScreen(
@@ -67,14 +68,50 @@ fun MapSelectionScreen(
 
     val searchQuery by mapViewModel.searchQuery.collectAsState()
     val suggestions by mapViewModel.suggestions.collectAsState()
+     var selectedCityName by remember { mutableStateOf<String?>(null) }
 
     var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
     var marker by remember { mutableStateOf<Marker?>(null) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
+     val snackbarHostState = remember { SnackbarHostState() }
+     val scope = rememberCoroutineScope()
+     Scaffold(
+         snackbarHost = {
+             SnackbarHost(hostState = snackbarHostState) { data ->
+                 Snackbar(
+                     shape = RoundedCornerShape(20.dp),
+                     containerColor = Color(0xFF1E88E5),
+                     contentColor = Color.White
+                 ) {
+                     Row(verticalAlignment = Alignment.CenterVertically) {
 
-    Box(Modifier.fillMaxSize()) {
+                         Icon(
+                             imageVector = Icons.Default.Favorite,
+                             contentDescription = null,
+                             tint = Color.Red,
+                             modifier = Modifier.size(40.dp)
+                         )
 
-        AndroidView(
+                         Spacer(Modifier.width(8.dp))
+
+                         Text(
+                             text = data.visuals.message,
+                             style = MaterialTheme.typography.bodyMedium
+                         )
+                     }
+                 }
+             }
+         }
+     ) { padding ->
+
+         Box(
+             Modifier
+                 .fillMaxSize()
+                 .padding(padding)
+         ) {
+
+
+         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
 
@@ -104,7 +141,7 @@ fun MapSelectionScreen(
                                 geoPoint.latitude,
                                 geoPoint.longitude
                             ) { cityName ->
-
+                                selectedCityName = cityName
                                 marker?.let { mv.overlays.remove(it) }
 
                                 val newMarker = Marker(mv)
@@ -185,6 +222,8 @@ fun MapSelectionScreen(
                                             Marker.ANCHOR_CENTER,
                                             Marker.ANCHOR_BOTTOM
                                         )
+                                        selectedCityName = "${city.name}, ${city.country}"
+
                                         newMarker.title =
                                             "${city.name}, ${city.country}"
                                         newMarker.showInfoWindow()
@@ -202,27 +241,39 @@ fun MapSelectionScreen(
             }
         }
         FloatingActionButton(
+            containerColor = Color.White,
+            shape = CircleShape,
             onClick = {
                 selectedPoint?.let {
 
-                    val cityName = searchQuery.ifBlank { "Custom Location" }
+                   // val cityName = searchQuery.ifBlank { "Custom Location" }
+                    val cityName = selectedCityName ?: "Selected Location"
 
                     favoriteViewModel.addFavorite(
                         name = cityName,
                         lat = it.latitude,
                         lon = it.longitude
                     )
+                    // show SnackBar
+                  //  Toast.makeText(context, "${cityName} added to favorites", Toast.LENGTH_SHORT).show()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "$cityName added to favorites",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+
                 }
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 90.dp),
-            containerColor = Color.Red
+
         ) {
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Add to favorites",
-                tint = Color.White
+                tint = Color.Red
             )
         }
 
@@ -249,4 +300,5 @@ fun MapSelectionScreen(
             Text("Confirm Location", color = Color.White)
         }
     }
+         }
 }
