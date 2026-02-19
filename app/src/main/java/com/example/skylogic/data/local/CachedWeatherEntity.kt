@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class CachedWeatherEntity(
 
     @PrimaryKey
-    val key: String, // lat,lon combination
+    val locationKey: String, // lat,lon combination
 
     val name: String,
     val temp: Double,
