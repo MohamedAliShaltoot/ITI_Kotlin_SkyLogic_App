@@ -1,4 +1,4 @@
-package com.example.skylogic.view.favouriteView
+package com.example.skylogic.view.favouriteView.favView
 
 
 
@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.skylogic.models.Screen
+import com.example.skylogic.view.favouriteView.FavoriteViewModel
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -156,7 +158,7 @@ fun FavouriteView(
 
                         var visible by remember { mutableStateOf(false) }
                         LaunchedEffect(Unit) {
-                            kotlinx.coroutines.delay(index * 60L)
+                            delay(index * 60L)
                             visible = true
                         }
 
