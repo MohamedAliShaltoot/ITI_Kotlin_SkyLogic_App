@@ -16,11 +16,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -31,6 +35,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -54,12 +59,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import com.example.skylogic.view.mapSelectionView.MapSelectionScreen
 import com.example.skylogic.models.Screen
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
 import com.example.skylogic.view.alertsView.AlertsView
+import com.example.skylogic.view.favouriteView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.favouriteView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsScreen
@@ -154,15 +161,14 @@ fun WeatherScreen(
             composable(
                 route = "favorite_details/{lat}/{lon}/{name}",
                 arguments = listOf(
-                    navArgument("lat") { type = NavType.FloatType },
-                            navArgument("lon") { type = NavType.FloatType },
-
-                            navArgument("name") { type = NavType.StringType }
+                    navArgument("lat") { type = NavType.StringType },
+                    navArgument("lon") { type = NavType.StringType },
+                    navArgument("name") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
 
-                val lat = backStackEntry.arguments?.getDouble("lat") ?: 0.0
-                val lon = backStackEntry.arguments?.getDouble("lon") ?: 0.0
+                val lat = backStackEntry.arguments?.getString("lat")?.toDouble() ?: 0.0
+                val lon = backStackEntry.arguments?.getString("lon")?.toDouble() ?: 0.0
                 val name = backStackEntry.arguments?.getString("name") ?: ""
 
                 FavoriteDetailsScreen(
@@ -171,6 +177,7 @@ fun WeatherScreen(
                     name = name
                 )
             }
+
 
             composable(Screen.Favourite.route) {
                 FavouriteView(
@@ -264,63 +271,4 @@ fun BottomItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FavoriteDetailsScreen(
-    lat: Double,
-    lon: Double,
-    name: String,
-    weatherViewModel: WeatherViewModel = viewModel()
-) {
 
-    LaunchedEffect(lat, lon) {
-        weatherViewModel.fetchWeather(lat, lon)
-    }
-
-    val forecast = weatherViewModel.forecast
-    val isLoading = weatherViewModel.isLoading
-
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(name) })
-        }
-    ) { padding ->
-
-        if (isLoading) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-
-        } else {
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-
-                items(forecast) { item ->
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        Column(Modifier.padding(12.dp)) {
-
-                            Text("Temp: ${item.main.temp}°C")
-                            Text("Weather: ${item.weather[0].description}")
-                            Text("Date: ${item.dt_txt}")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
