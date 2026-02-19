@@ -26,8 +26,6 @@ class FavoriteViewModel(application: Application)
         AppDatabase.getDatabase(application).favoriteDao()
 
     private val repository = FavoriteRepository(dao)
-//    private val _weatherMap = MutableStateFlow<Map<String, CurrentWeatherResponse>>(emptyMap())
-//    val weatherMap: StateFlow<Map<String, CurrentWeatherResponse>> = _weatherMap
 
     private val forecastDao =
         AppDatabase.getDatabase(application).cachedForecastDao()
@@ -37,12 +35,6 @@ class FavoriteViewModel(application: Application)
 
     val forecastMap: StateFlow<Map<String, List<ForecastItem>>> =
         _forecastMap
-
-
-//    private val _forecastMap =
-//    MutableStateFlow<Map<String, List<ForecastItem>>>(emptyMap())
-//    val forecastMap: StateFlow<Map<String, List<ForecastItem>>> =
-//        _forecastMap
 
     private val cachedDao =
         AppDatabase.getDatabase(application).cachedWeatherDao()
@@ -105,10 +97,23 @@ class FavoriteViewModel(application: Application)
                 val response =
                     RetrofitInstance.api.getCurrentWeather(lat, lon)
 
+//                val entity = CachedWeatherEntity(
+//                    locationKey = key,
+//                    name = response.name,
+//                    temp = response.main.temp,
+//                    description = response.weather[0].description,
+//                    icon = response.weather[0].icon,
+//                    timestamp = now
+//                )
                 val entity = CachedWeatherEntity(
                     locationKey = key,
                     name = response.name,
                     temp = response.main.temp,
+                    feelsLike = response.main.feels_like,
+                    humidity = response.main.humidity,
+                    pressure = response.main.pressure,
+                    windSpeed = response.wind.speed,
+                   // clouds = response.,
                     description = response.weather[0].description,
                     icon = response.weather[0].icon,
                     timestamp = now
@@ -131,26 +136,6 @@ class FavoriteViewModel(application: Application)
             }
         }
     }
-//    fun loadForecast(lat: Double, lon: Double) {
-//
-//        val key = "$lat,$lon"
-//
-//        if (_forecastMap.value.containsKey(key)) return
-//
-//        viewModelScope.launch {
-//            try {
-//                val response = RetrofitInstance.api.getForecast(lat, lon)
-//
-//                _forecastMap.value =
-//                    _forecastMap.value.toMutableMap().apply {
-//                        put(key, response.list)
-//                    }
-//
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 fun loadForecast(lat: Double, lon: Double) {
 
     val key = "$lat,$lon"
@@ -217,7 +202,4 @@ fun loadForecast(lat: Double, lon: Double) {
         }
     }
 }
-
-
-
 }
