@@ -40,6 +40,9 @@ fun FavoriteDetailsScreen(
 ) {
 
     val key = "$lat,$lon"
+//    val forecastMap by viewModel.forecastMap.collectAsState()
+//    val forecast = forecastMap[key]
+
     val forecastMap by viewModel.forecastMap.collectAsState()
     val forecast = forecastMap[key]
 
