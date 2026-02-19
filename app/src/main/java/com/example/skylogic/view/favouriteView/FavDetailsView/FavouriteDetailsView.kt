@@ -1,8 +1,7 @@
-package com.example.skylogic.view.favouriteView
+package com.example.skylogic.view.favouriteView.FavDetailsView
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,14 +21,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.skylogic.models.ForecastItem
+import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.weatherView.reusable.formatDay
-import com.example.skylogic.view.weatherView.reusable.formatUnixTime
 import java.time.LocalDate
 
 
@@ -100,7 +97,7 @@ fun FavoriteDetailsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor =FavoriteDetailsViewColors. SkyDeep,
+                    containerColor = FavoriteDetailsViewColors. SkyDeep,
                     titleContentColor = FavoriteDetailsViewColors.TextPrimary
                 ),
                 modifier = Modifier.shadow(
@@ -133,7 +130,7 @@ fun FavoriteDetailsScreen(
                             modifier = Modifier.size(52.dp),
                             color = FavoriteDetailsViewColors.SkyAccent,
                             strokeWidth = 3.dp,
-                            trackColor =FavoriteDetailsViewColors. SkyAccent.copy(alpha = 0.2f)
+                            trackColor = FavoriteDetailsViewColors. SkyAccent.copy(alpha = 0.2f)
                         )
                         Text(
                             text = "Fetching weather…",
@@ -202,7 +199,7 @@ fun FavoriteDetailsScreen(
                                 // Description
                                 Text(
                                     text = weather.description.replaceFirstChar { it.uppercase() },
-                                    color =FavoriteDetailsViewColors. TextSecondary,
+                                    color = FavoriteDetailsViewColors. TextSecondary,
                                     fontSize = 18.sp,
                                     letterSpacing = 0.5.sp
                                 )
