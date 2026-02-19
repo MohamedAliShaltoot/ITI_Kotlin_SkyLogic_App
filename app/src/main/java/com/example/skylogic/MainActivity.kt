@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -41,9 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import com.example.skylogic.view.mapSelectionView.MapSelectionScreen
 import com.example.skylogic.models.Screen
@@ -51,7 +52,9 @@ import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
 import com.example.skylogic.view.alertsView.AlertsView
-import com.example.skylogic.view.favouriteView.FavouriteView
+import com.example.skylogic.view.favouriteView.FavDetailsView.FavoriteDetailsScreen
+import com.example.skylogic.view.favouriteView.FavoriteViewModel
+import com.example.skylogic.view.favouriteView.favView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsScreen
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import com.example.skylogic.view.weatherView.reusable.WeatherContent
@@ -81,6 +84,7 @@ fun WeatherScreen(
 ) {
 
     val navController = rememberNavController()
+    val favoriteViewModel: FavoriteViewModel = viewModel()
 
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context) }
@@ -135,13 +139,40 @@ fun WeatherScreen(
                 MapSelectionScreen(
                     navController = navController,
                     settingsViewModel = settingsViewModel,
-                    weatherViewModel = viewModel
+                    weatherViewModel = viewModel,
+                    favoriteViewModel = favoriteViewModel
                 )
             }
 
-            composable(Screen.Favourite.route) {
-                FavouriteView()
+            composable(
+                route = "favorite_details/{lat}/{lon}/{name}",
+                arguments = listOf(
+                    navArgument("lat") { type = NavType.StringType },
+                    navArgument("lon") { type = NavType.StringType },
+                    navArgument("name") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+
+                val lat = backStackEntry.arguments?.getString("lat")?.toDouble() ?: 0.0
+                val lon = backStackEntry.arguments?.getString("lon")?.toDouble() ?: 0.0
+                val name = backStackEntry.arguments?.getString("name") ?: ""
+
+                FavoriteDetailsScreen(
+                    lat = lat,
+                    lon = lon,
+                    name = name,
+                    onBack = { navController.popBackStack() },
+                )
             }
+
+
+            composable(Screen.Favourite.route) {
+                FavouriteView(
+                    navController = navController,
+                    viewModel = favoriteViewModel
+                )
+            }
+
 
             composable(Screen.Alerts.route) {
                 AlertsView()
@@ -226,4 +257,5 @@ fun BottomItem(
         Text(label.uppercase(), color = tint, fontSize = 12.sp)
     }
 }
+
 
