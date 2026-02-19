@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -64,6 +66,7 @@ import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
 import com.example.skylogic.view.alertsView.AlertsView
+import com.example.skylogic.view.favouriteView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.favouriteView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsScreen
@@ -158,15 +161,14 @@ fun WeatherScreen(
             composable(
                 route = "favorite_details/{lat}/{lon}/{name}",
                 arguments = listOf(
-                    navArgument("lat") { type = NavType.FloatType },
-                            navArgument("lon") { type = NavType.FloatType },
-
-                            navArgument("name") { type = NavType.StringType }
+                    navArgument("lat") { type = NavType.StringType },
+                    navArgument("lon") { type = NavType.StringType },
+                    navArgument("name") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
 
-                val lat = backStackEntry.arguments?.getDouble("lat") ?: 0.0
-                val lon = backStackEntry.arguments?.getDouble("lon") ?: 0.0
+                val lat = backStackEntry.arguments?.getString("lat")?.toDouble() ?: 0.0
+                val lon = backStackEntry.arguments?.getString("lon")?.toDouble() ?: 0.0
                 val name = backStackEntry.arguments?.getString("name") ?: ""
 
                 FavoriteDetailsScreen(
@@ -175,6 +177,7 @@ fun WeatherScreen(
                     name = name
                 )
             }
+
 
             composable(Screen.Favourite.route) {
                 FavouriteView(
@@ -268,115 +271,4 @@ fun BottomItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FavoriteDetailsScreen(
-    lat: Double,
-    lon: Double,
-    name: String,
-    weatherViewModel: WeatherViewModel = viewModel()
-) {
 
-    LaunchedEffect(lat, lon) {
-        weatherViewModel.fetchWeather(lat, lon)
-    }
-
-    val forecast = weatherViewModel.forecast
-    val isLoading = weatherViewModel.isLoading
-
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(name) })
-        }
-    ) { padding ->
-
-        if (isLoading) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-
-                item {
-
-                    val current = weatherViewModel.currentWeather
-
-                    current?.let {
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-
-                            val iconUrl =
-                                "https://openweathermap.org/img/wn/${it.weather[0].icon}@4x.png"
-
-                            AsyncImage(
-                                model = iconUrl,
-                                contentDescription = null,
-                                modifier = Modifier.size(120.dp)
-                            )
-
-                            Text(
-                                text = "${it.main.temp}°C",
-                                style = MaterialTheme.typography.displayMedium
-                            )
-
-                            Text(
-                                text = it.weather[0].description,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-                }
-
-                items(forecast) { item ->
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-
-                            Column {
-                                Text(item.dt_txt)
-                                Text("${item.main.temp}°C")
-                            }
-
-                            val iconUrl =
-                                "https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"
-
-                            AsyncImage(
-                                model = iconUrl,
-                                contentDescription = null,
-                                modifier = Modifier.size(50.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-}

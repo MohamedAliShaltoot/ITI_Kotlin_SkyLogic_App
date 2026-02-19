@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.skylogic.data.local.CachedWeatherEntity
 import com.example.skylogic.data.local.FavoriteEntity
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.models.Screen
@@ -94,10 +95,14 @@ val context = LocalContext.current
                     key = { "${it.lat},${it.lon}" }
                 )
                 { favorite ->
+                    val key = "${favorite.lat},${favorite.lon}"
+
+
 
                     FavoriteItem(
                         favorite = favorite,
-                        weather = weatherMap[favorite.name],
+                     //   weather = weatherMap[favorite.name],
+                        weather = weatherMap[key],
                         onDelete = {
                             viewModel.deleteFavorite(favorite)
                             Toast.makeText(
@@ -116,7 +121,7 @@ val context = LocalContext.current
                             viewModel.loadWeatherForFavorite(
                                 favorite.lat,
                                 favorite.lon,
-                                favorite.name
+                               // favorite.name
                             )
                         }
                     )
@@ -129,7 +134,9 @@ val context = LocalContext.current
 @Composable
 fun FavoriteItem(
     favorite: FavoriteEntity,
-    weather: CurrentWeatherResponse?,
+    //weather: CurrentWeatherResponse?,
+    weather: CachedWeatherEntity?,
+
     onDelete: () -> Unit,
     onClick: () -> Unit,
     onAppear: () -> Unit
@@ -166,19 +173,19 @@ fun FavoriteItem(
 
                 weather?.let {
                     Text(
-                        text = "${it.main.temp}°C",
+                        text = "${it.temp}°C",
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     Text(
-                        text = it.weather[0].description,
+                        text = it.description,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
 
             weather?.let {
-                val iconCode = it.weather[0].icon
+                val iconCode = it.icon
                 val iconUrl =
                     "https://openweathermap.org/img/wn/${iconCode}@2x.png"
 
