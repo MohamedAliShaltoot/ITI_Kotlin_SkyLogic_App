@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -31,6 +33,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -54,6 +57,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import com.example.skylogic.view.mapSelectionView.MapSelectionScreen
 import com.example.skylogic.models.Screen
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
@@ -298,29 +302,81 @@ fun FavoriteDetailsScreen(
             }
 
         } else {
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
 
+                item {
+
+                    val current = weatherViewModel.currentWeather
+
+                    current?.let {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            val iconUrl =
+                                "https://openweathermap.org/img/wn/${it.weather[0].icon}@4x.png"
+
+                            AsyncImage(
+                                model = iconUrl,
+                                contentDescription = null,
+                                modifier = Modifier.size(120.dp)
+                            )
+
+                            Text(
+                                text = "${it.main.temp}°C",
+                                style = MaterialTheme.typography.displayMedium
+                            )
+
+                            Text(
+                                text = it.weather[0].description,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+
                 items(forecast) { item ->
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Column(Modifier.padding(12.dp)) {
 
-                            Text("Temp: ${item.main.temp}°C")
-                            Text("Weather: ${item.weather[0].description}")
-                            Text("Date: ${item.dt_txt}")
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Column {
+                                Text(item.dt_txt)
+                                Text("${item.main.temp}°C")
+                            }
+
+                            val iconUrl =
+                                "https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"
+
+                            AsyncImage(
+                                model = iconUrl,
+                                contentDescription = null,
+                                modifier = Modifier.size(50.dp)
+                            )
                         }
                     }
                 }
             }
+
         }
     }
 }
