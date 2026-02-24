@@ -51,7 +51,8 @@ import com.example.skylogic.models.Screen
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
-import com.example.skylogic.view.alertsView.AlertsView
+import com.example.skylogic.view.alertsView.AlertScreen
+import com.example.skylogic.view.alertsView.AlertViewModel
 import com.example.skylogic.view.favouriteView.FavDetailsView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.favouriteView.favView.FavouriteView
@@ -60,7 +61,7 @@ import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import com.example.skylogic.view.weatherView.reusable.WeatherContent
 
 class MainActivity : ComponentActivity() {
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +76,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+@androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun WeatherScreen(
@@ -85,6 +86,7 @@ fun WeatherScreen(
 
     val navController = rememberNavController()
     val favoriteViewModel: FavoriteViewModel = viewModel()
+    val alertViewModel: AlertViewModel = viewModel()
 
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context) }
@@ -126,9 +128,19 @@ fun WeatherScreen(
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Splash.route) {
+                SkyLogicSplashScreen(
+                    onSplashComplete = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true } // removes splash from back stack
+                        }
+                    }
+                )
+            }
+
             composable(Screen.Home.route) {
                 WeatherContent(
                     viewModel = viewModel,
@@ -174,8 +186,10 @@ fun WeatherScreen(
             }
 
 
-            composable(Screen.Alerts.route) {
-                AlertsView()
+            composable(Screen.Alerts.route)  {
+                AlertScreen(
+                    viewModel = alertViewModel
+                )
             }
             composable(Screen.Settings.route) {
             SettingsScreen(

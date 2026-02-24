@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -35,9 +36,20 @@
                 <data android:host="www.google.com"/>
                 <data android:pathPrefix="/maps"/>
             </intent-filter>
-
-
         </activity>
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.SkyLogic"
+            tools:targetApi="27" />
+
+        <receiver
+            android:name=".AlertReceiver"
+            android:exported="false" />
+
+
     </application>
 
 </manifest>

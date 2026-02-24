@@ -9,9 +9,10 @@ import androidx.room.RoomDatabase
     entities = [
         FavoriteEntity::class,
         CachedWeatherEntity::class,
-        CachedForecastEntity::class
+        CachedForecastEntity::class,
+        AlertEntity::class
     ],
-    version = 4
+    version = 6
 )
 
 abstract class AppDatabase : RoomDatabase() {
@@ -19,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
     abstract fun cachedWeatherDao(): CachedWeatherDao
     abstract fun cachedForecastDao(): CachedForecastDao
-
+    abstract fun alertDao(): AlertDao
 
 
     companion object {
