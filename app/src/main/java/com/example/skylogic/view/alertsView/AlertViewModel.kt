@@ -14,10 +14,12 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.skylogic.AlertReceiver
-import com.example.skylogic.data.local.AlertEntity
-import com.example.skylogic.data.local.AppDatabase
-import com.example.skylogic.data.repository.AlertRepository
+import com.example.skylogic.data.local.alert.AlertEntity
+import com.example.skylogic.data.local.LocalDataSource
+import com.example.skylogic.data.remote.RemoteDataSource
+import com.example.skylogic.data.repository.AppRepository
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -26,15 +28,20 @@ import kotlin.jvm.java
 class AlertViewModel(application: Application)
     : AndroidViewModel(application) {
 
-    private val dao = AppDatabase.getDatabase(application).alertDao()
-    private val repository = AlertRepository(dao)
+    private val remote = RemoteDataSource()
+    private val local = LocalDataSource(application)
+    private val appRepository = AppRepository(local ,remote)
     private val scheduler = AlarmScheduler(application)
-    val alerts = repository.alerts
-        .stateIn(
+
+
+    fun getAllAlerts(): StateFlow<List<AlertEntity>> {
+        return appRepository.getAllAlerts() .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
         )
+    }
+
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     fun addAlert(
         start: Long,
@@ -45,8 +52,7 @@ class AlertViewModel(application: Application)
     ) {
 
         viewModelScope.launch {
-
-            val id = repository.insert(
+            val id = appRepository.insertAlert(
                 AlertEntity(
                     startTime = start,
                     endTime = end,
@@ -80,8 +86,8 @@ class AlertViewModel(application: Application)
     fun deleteAlert(alert: AlertEntity) {
 
         viewModelScope.launch {
-            repository.delete(alert)
-
+            //repository.delete(alert)
+            appRepository.deleteAlert(alert)
             WorkManager.getInstance(getApplication())
                 .cancelUniqueWork("weather_alert_${alert.id}")
         }
@@ -116,7 +122,6 @@ class AlertViewModel(application: Application)
         )
     }
 
-
     private fun cancelAlarm(alert: AlertEntity) {
 
         val context = getApplication<Application>()
@@ -136,27 +141,3 @@ class AlertViewModel(application: Application)
         alarmManager.cancel(pendingIntent)
     }
 }
-//    private fun scheduleAlarm(alert: AlertEntity) {
-//
-//        val context = getApplication<Application>()
-//
-//        val alarmManager =
-//            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//
-//        val intent = Intent(context, AlertReceiver::class.java).apply {
-//            putExtra("type", alert.type)
-//        }
-//
-//        val pendingIntent = PendingIntent.getBroadcast(
-//            context,
-//            alert.id,
-//            intent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//        alarmManager.setExactAndAllowWhileIdle(
-//            AlarmManager.RTC_WAKEUP,
-//            alert.startTime,
-//            pendingIntent
-//        )
-//    }

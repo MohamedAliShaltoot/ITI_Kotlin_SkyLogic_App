@@ -36,8 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.skylogic.data.local.CachedWeatherEntity
-import com.example.skylogic.data.local.FavoriteEntity
+import com.example.skylogic.data.local.weather.CachedWeatherEntity
+import com.example.skylogic.data.local.fav.FavoriteEntity
 
 @Composable
 fun FavoriteItem(

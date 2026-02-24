@@ -66,10 +66,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val destination = intent?.getStringExtra("DESTINATION")
         setContent {
             SkyLogicTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    WeatherScreen()
+                    WeatherScreen(
+                        startDestination = destination
+                    )
                 }
             }
         }
@@ -80,6 +83,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun WeatherScreen(
+    startDestination: String? = null,
     viewModel: WeatherViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
@@ -128,7 +132,11 @@ fun WeatherScreen(
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Splash.route,
+          //  startDestination = Screen.Splash.route,
+            startDestination = when (startDestination) {
+                "alerts" -> Screen.Alerts.route
+                else -> Screen.Splash.route
+            },
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Splash.route) {

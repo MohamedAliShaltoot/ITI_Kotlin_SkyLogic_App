@@ -40,7 +40,10 @@ fun FavouriteView(
     navController: NavController,
     viewModel: FavoriteViewModel = viewModel()
 ) {
-    val favorites by viewModel.favorites.collectAsState()
+    //val favorites by viewModel.favorites.collectAsState()
+    val favorites by viewModel.getAllFavorites().collectAsState(
+        initial = emptyList()
+    )
     val weatherMap by viewModel.weatherMap.collectAsState()
     val context = LocalContext.current
 

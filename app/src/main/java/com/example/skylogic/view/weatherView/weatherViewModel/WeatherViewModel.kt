@@ -1,18 +1,25 @@
 package com.example.skylogic.view.weatherView.weatherViewModel
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.skylogic.data.local.LocalDataSource
+import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.remote.RetrofitInstance
+import com.example.skylogic.data.repository.AppRepository
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.models.GeoResponse
 import kotlinx.coroutines.launch
 
-class WeatherViewModel : ViewModel() {
-
+class WeatherViewModel(application: Application)
+    : AndroidViewModel(application) {
+    private val remote = RemoteDataSource()
+    private val local = LocalDataSource(application)
+    private val appRepository = AppRepository(local ,remote)
     var currentWeather by mutableStateOf<CurrentWeatherResponse?>(null)
         private set
 
@@ -21,14 +28,17 @@ class WeatherViewModel : ViewModel() {
 
     var isLoading by mutableStateOf(false)
         private set
-    private val weatherService = RetrofitInstance.api
+    //private val weatherService = RetrofitInstance.api
 
     suspend fun getCityCoordinates(query: String): List<GeoResponse> {
-        return weatherService.getCityCoordinates(query)
+
+       // return weatherService.getCityCoordinates(query)
+        return appRepository.getCityCoordinates(query)
     }
 
     suspend fun reverseGeocode(lat: Double, lon: Double): List<GeoResponse> {
-        return weatherService.reverseGeocode(lat, lon)
+        //return weatherService.reverseGeocode(lat, lon)
+        return appRepository.reverseGeocode(lat, lon)
     }
 
     fun fetchWeather(

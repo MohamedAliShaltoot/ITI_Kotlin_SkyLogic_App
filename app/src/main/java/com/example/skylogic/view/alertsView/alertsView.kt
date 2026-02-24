@@ -7,43 +7,25 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.skylogic.data.local.AlertEntity
 import com.example.skylogic.view.alertsView.reusable.AddAlertBottomSheet
 import com.example.skylogic.view.alertsView.reusable.AlertCard
 import com.example.skylogic.view.alertsView.reusable.AlertColors
 import com.example.skylogic.view.alertsView.reusable.AlertTopBar
-import com.example.skylogic.view.alertsView.reusable.ConditionChip
 import com.example.skylogic.view.alertsView.reusable.ConditionMeta
-import com.example.skylogic.view.alertsView.reusable.DateTimePicker
 import com.example.skylogic.view.alertsView.reusable.EmptyState
-import com.example.skylogic.view.alertsView.reusable.SheetSectionLabel
-import com.example.skylogic.view.alertsView.reusable.TypeChip
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -52,7 +34,8 @@ import java.util.*
 @androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
 @Composable
 fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
-    val alerts by viewModel.alerts.collectAsState()
+  //  val alerts by viewModel.alerts.collectAsState()
+    val alerts by viewModel.getAllAlerts().collectAsState()
     var showSheet by remember { mutableStateOf(false) }
 
     Box(

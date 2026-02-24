@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.skylogic.data.local.AlertEntity
+import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.view.alertsView.conditionMap
 import com.example.skylogic.view.alertsView.formatFullDateTime
 
