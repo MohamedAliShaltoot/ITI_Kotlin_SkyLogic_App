@@ -1,4 +1,4 @@
-package com.example.skylogic.data.local
+package com.example.skylogic.data.local.alert
 
 import androidx.room.Dao
 import androidx.room.Delete

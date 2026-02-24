@@ -4,6 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.skylogic.data.local.alert.AlertDao
+import com.example.skylogic.data.local.alert.AlertEntity
+import com.example.skylogic.data.local.fav.FavoriteDao
+import com.example.skylogic.data.local.fav.FavoriteEntity
+import com.example.skylogic.data.local.forcast.CachedForecastDao
+import com.example.skylogic.data.local.forcast.CachedForecastEntity
+import com.example.skylogic.data.local.weather.CachedWeatherDao
+import com.example.skylogic.data.local.weather.CachedWeatherEntity
 
 @Database(
     entities = [

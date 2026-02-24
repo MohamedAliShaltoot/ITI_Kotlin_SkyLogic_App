@@ -2,6 +2,7 @@ package com.example.skylogic.view.alertsView
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -10,9 +11,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.example.skylogic.AlarmActivity
+import com.example.skylogic.MainActivity
 import com.example.skylogic.R
 import com.example.skylogic.data.local.AppDatabase
+import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.remote.RetrofitInstance
+import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.view.settingView.SettingsDataStore
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -34,14 +38,14 @@ class WeatherAlertWorker(
 
         val now = System.currentTimeMillis()
 
-        // 1️⃣ Check duration validity
+        // Check duration validity
         if (now > alert.endTime) {
             WorkManager.getInstance(applicationContext)
                 .cancelUniqueWork("weather_alert_$alertId")
             return Result.success()
         }
 
-        // 2️⃣ Get selected location from Settings
+        // Get selected location from Settings
         val settings = SettingsDataStore(applicationContext)
 
         val lat = settings.lat.firstOrNull() ?: return Result.failure()
@@ -51,9 +55,7 @@ class WeatherAlertWorker(
 
             val forecast =
                 RetrofitInstance.api.getForecast(lat, lon)
-
-            val match = forecast.list.any { item ->
-
+            val matchedItem = forecast.list.firstOrNull { item ->
                 when (alert.condition) {
 
                     "rain" ->
@@ -75,9 +77,9 @@ class WeatherAlertWorker(
                 }
             }
 
-            if (match) {
+            if (matchedItem != null) {
                 if (alert.type == "notification") {
-                    showNotification()
+                    showNotification(alert, matchedItem)
                 } else {
                     openAlarmScreen()
                 }
@@ -90,33 +92,74 @@ class WeatherAlertWorker(
         }
     }
 
-    private fun showNotification() {
-        val context = applicationContext
-        val channelId = "weather_alert_channel"
+private fun showNotification(
+    alert: AlertEntity,
+    matchedItem: ForecastItem
+) {
 
-        val manager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE)
-                    as NotificationManager
+    val context = applicationContext
+    val channelId = "weather_alert_channel"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Weather Alerts",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            manager.createNotificationChannel(channel)
-        }
+    val manager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager
 
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.mipmap.app_icon)
-            .setContentTitle("Weather Alert")
-            .setContentText("Weather condition matched!")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-
-        manager.notify(1001, notification)
+    // Intent to open app
+    val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        putExtra("DESTINATION", "alerts")
+        putExtra("ALERT_ID", alert.id)
     }
 
+    val pendingIntent = PendingIntent.getActivity(
+        context,
+        alert.id,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            channelId,
+            "Weather Alerts",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        manager.createNotificationChannel(channel)
+    }
+
+    val title = when (alert.condition) {
+        "rain" -> "🌧 Rain Alert"
+        "snow" -> "❄ Snow Alert"
+        "wind" -> "🌬 Wind Alert"
+        "temp_high" -> "🌡 High Temperature Alert"
+        "temp_low" -> "🥶 Low Temperature Alert"
+        else -> "Weather Alert"
+    }
+    val description = buildString {
+        appendLine("📍 Current Conditions")
+        appendLine()
+        appendLine("🌡 Temp: ${matchedItem.main.temp}°C")
+        appendLine("🤒 Feels: ${matchedItem.main.feels_like}°C")
+        appendLine("💨 Wind: ${matchedItem.wind.speed} m/s")
+        appendLine("💧 Humidity: ${matchedItem.main.humidity}%")
+    }
+
+    val notification = NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(R.mipmap.app_icon)
+        .setContentTitle(title)
+        .setContentText("Tap to view details")
+        .setStyle(
+            NotificationCompat.BigTextStyle()
+                .setBigContentTitle(title)
+                .bigText(description)
+        )
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setContentIntent(pendingIntent)
+        .setAutoCancel(true)
+        .build()
+
+    manager.notify(alert.id, notification)
+}
     private fun openAlarmScreen() {
         val intent = Intent(
             applicationContext,
@@ -128,4 +171,3 @@ class WeatherAlertWorker(
         applicationContext.startActivity(intent)
     }
 }
-

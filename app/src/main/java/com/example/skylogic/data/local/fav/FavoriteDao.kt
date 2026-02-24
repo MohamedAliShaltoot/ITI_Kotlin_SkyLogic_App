@@ -1,4 +1,4 @@
-package com.example.skylogic.data.local
+package com.example.skylogic.data.local.fav
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow

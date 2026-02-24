@@ -7,33 +7,6 @@ import com.example.skylogic.models.GeoResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-//interface WeatherService {
-//
-//    @GET("data/2.5/weather")
-//    suspend fun getCurrentWeather(
-//        @Query("lat") lat: Double,
-//        @Query("lon") lon: Double,
-//        @Query("units") units: String = "metric",
-//        @Query("lang") lang: String = "en"
-//    ): CurrentWeatherResponse
-//
-//
-//    @GET("data/2.5/forecast")
-//    suspend fun getForecast(
-//        @Query("lat") lat: Double,
-//        @Query("lon") lon: Double,
-//        @Query("units") units: String = "metric",
-//        @Query("lang") lang: String = "en"
-//    ): ForecastResponse
-//
-//    @GET("geo/1.0/direct")
-//    suspend fun getCityCoordinates(
-//        @Query("q") city: String,
-//        @Query("limit") limit: Int = 1,
-//        @Query("appid") apiKey: String = AppConstants.API_KEY
-//    ): List<GeoResponse>
-//
-//}
 interface WeatherService {
 
     @GET("data/2.5/weather")

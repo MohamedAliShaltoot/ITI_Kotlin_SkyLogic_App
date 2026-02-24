@@ -4,15 +4,17 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skylogic.data.local.AppDatabase
-import com.example.skylogic.data.local.CachedForecastEntity
-import com.example.skylogic.data.local.CachedWeatherEntity
-import com.example.skylogic.data.local.FavoriteEntity
+import com.example.skylogic.data.local.LocalDataSource
+import com.example.skylogic.data.local.forcast.CachedForecastEntity
+import com.example.skylogic.data.local.weather.CachedWeatherEntity
+import com.example.skylogic.data.local.fav.FavoriteEntity
+import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.remote.RetrofitInstance
-import com.example.skylogic.data.repository.FavoriteRepository
-import com.example.skylogic.models.CurrentWeatherResponse
+import com.example.skylogic.data.repository.AppRepository
 import com.example.skylogic.models.ForecastItem
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +23,9 @@ import kotlinx.coroutines.launch
 
 class FavoriteViewModel(application: Application)
     : AndroidViewModel(application) {
-
-    private val dao =
-        AppDatabase.getDatabase(application).favoriteDao()
-
-    private val repository = FavoriteRepository(dao)
-
-    private val forecastDao =
-        AppDatabase.getDatabase(application).cachedForecastDao()
+    private val remote = RemoteDataSource()
+    private val local = LocalDataSource(application)
+    private val appRepository = AppRepository(local ,remote)
 
     private val _forecastMap =
         MutableStateFlow<Map<String, List<ForecastItem>>>(emptyMap())
@@ -36,27 +33,26 @@ class FavoriteViewModel(application: Application)
     val forecastMap: StateFlow<Map<String, List<ForecastItem>>> =
         _forecastMap
 
-    private val cachedDao =
-        AppDatabase.getDatabase(application).cachedWeatherDao()
-
     private val _weatherMap =
         MutableStateFlow<Map<String, CachedWeatherEntity>>(emptyMap())
     val weatherMap: StateFlow<Map<String, CachedWeatherEntity>> =
         _weatherMap
 
-    val favorites =
-        repository.favorites
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
-                emptyList()
-            )
+
+     fun getAllFavorites() : Flow<List<FavoriteEntity>> {
+        return appRepository.getAllFavorites().stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+    }
+
 
     fun addFavorite(name: String, lat: Double, lon: Double) {
 
         viewModelScope.launch {
 
-            repository.addFavorite(
+            appRepository.insertFavorite(
                 FavoriteEntity(
                     name = name,
                     lat = lat,
@@ -69,7 +65,7 @@ class FavoriteViewModel(application: Application)
     fun deleteFavorite(favorite: FavoriteEntity) {
 
         viewModelScope.launch {
-            repository.removeFavorite(favorite)
+            appRepository.deleteFavorite(favorite)
         }
     }
 
@@ -79,7 +75,7 @@ class FavoriteViewModel(application: Application)
 
             val key = "$lat,$lon"
 
-            val cached = cachedDao.getWeather(key)
+            val cached = appRepository.getCachedWeather(key)
 
             val now = System.currentTimeMillis()
             val isFresh =
@@ -97,14 +93,6 @@ class FavoriteViewModel(application: Application)
                 val response =
                     RetrofitInstance.api.getCurrentWeather(lat, lon)
 
-//                val entity = CachedWeatherEntity(
-//                    locationKey = key,
-//                    name = response.name,
-//                    temp = response.main.temp,
-//                    description = response.weather[0].description,
-//                    icon = response.weather[0].icon,
-//                    timestamp = now
-//                )
                 val entity = CachedWeatherEntity(
                     locationKey = key,
                     name = response.name,
@@ -119,7 +107,8 @@ class FavoriteViewModel(application: Application)
                     timestamp = now
                 )
 
-                cachedDao.insert(entity)
+
+                appRepository.insertCachedWeather(entity)
 
                 _weatherMap.value =
                     _weatherMap.value.toMutableMap().apply {
@@ -142,7 +131,9 @@ fun loadForecast(lat: Double, lon: Double) {
 
     viewModelScope.launch {
 
-        val cached = forecastDao.getForecast(key)
+        //val cached = forecastDao.getForecast(key)
+        val cached = appRepository.getCachedForecast(key)
+
 
         val now = System.currentTimeMillis()
         val isFresh =
@@ -152,7 +143,7 @@ fun loadForecast(lat: Double, lon: Double) {
 
             val list: List<ForecastItem> =
                 Gson().fromJson(
-                    cached!!.forecastJson,
+                    cached.forecastJson,
                     object : TypeToken<List<ForecastItem>>() {}.type
                 )
 
@@ -171,7 +162,7 @@ fun loadForecast(lat: Double, lon: Double) {
 
             val json = Gson().toJson(response.list)
 
-            forecastDao.insert(
+            appRepository.insertCachedForecast(
                 CachedForecastEntity(
                     locationKey = key,
                     forecastJson = json,

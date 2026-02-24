@@ -1,4 +1,4 @@
-package com.example.skylogic.data.local
+package com.example.skylogic.data.local.weather
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

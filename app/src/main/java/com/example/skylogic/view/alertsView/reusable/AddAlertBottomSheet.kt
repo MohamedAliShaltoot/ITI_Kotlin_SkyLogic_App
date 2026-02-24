@@ -217,10 +217,13 @@ fun AddAlertBottomSheet(
             Spacer(Modifier.height(30.dp))
 
             // Save
+            val needsThreshold = selectedCondition.contains("temp") || selectedCondition == "wind"
+            val isThresholdValid = !needsThreshold || (thresholdText.isNotEmpty() && thresholdText.toDoubleOrNull() != null)
             Button(
                 onClick = {
                     onSave(startTime, endTime, selectedType, selectedCondition, thresholdText.toDoubleOrNull())
                 },
+                enabled = isThresholdValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -235,3 +238,20 @@ fun AddAlertBottomSheet(
         }
     }
 }
+
+/*
+// Save
+val needsThreshold = selectedCondition.contains("temp") || selectedCondition == "wind"
+val isThresholdValid = !needsThreshold || (thresholdText.isNotEmpty() && thresholdText.toDoubleOrNull() != null)
+
+Button(
+    onClick = {
+        onSave(startTime, endTime, selectedType, selectedCondition, thresholdText.toDoubleOrNull())
+    },
+    enabled = isThresholdValid,   // <-- add this
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(54.dp),
+    ...
+)
+ */
