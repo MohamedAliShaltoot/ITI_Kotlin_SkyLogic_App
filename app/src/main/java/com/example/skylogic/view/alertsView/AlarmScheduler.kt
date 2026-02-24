@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
 import com.example.skylogic.AlertReceiver
-import com.example.skylogic.data.local.AlertEntity
+import com.example.skylogic.data.local.alert.AlertEntity
 
 class AlarmScheduler(private val context: Context) {
 
