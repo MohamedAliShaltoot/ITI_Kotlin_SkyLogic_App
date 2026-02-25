@@ -18,10 +18,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.skylogic.R
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.utils.GlassCard
 
@@ -65,7 +67,7 @@ fun ExpandableHourlyCard(item: ForecastItem) {
             )
 
             Text(
-                "Feels ${item.main.feels_like.toInt()}°",
+                "${stringResource(R.string.FeelsLike)} ${item.main.feels_like.toInt()}°",
                 color = Color.LightGray,
                 fontSize = 12.sp
             )
@@ -73,7 +75,7 @@ fun ExpandableHourlyCard(item: ForecastItem) {
             Spacer(Modifier.height(6.dp))
 
             Text(
-                "Rain ${(item.pop * 100).toInt()}%",
+                "${stringResource(R.string.Rain)} ${(item.pop * 100).toInt()}%",
                 color = Color.Cyan,
                 fontSize = 12.sp
             )
@@ -84,14 +86,26 @@ fun ExpandableHourlyCard(item: ForecastItem) {
                 Divider(color = Color.White.copy(alpha = 0.2f))
                 Spacer(Modifier.height(12.dp))
 
-                WeatherInfoItem("Humidity", "${item.main.humidity}%")
-                WeatherInfoItem("Pressure", "${item.main.pressure} hPa")
-                WeatherInfoItem("Clouds", "${item.clouds.all}%")
-                WeatherInfoItem("Visibility", "${item.visibility / 1000} km")
-                WeatherInfoItem("Wind Speed", "${item.wind.speed} m/s")
-                WeatherInfoItem("Wind Direction", "${item.wind.deg}°")
+                WeatherInfoItem(stringResource(R.string.Humidity), "${item.main.humidity}${
+                    stringResource(
+                        R.string.percentage
+                    )
+                }")
+                WeatherInfoItem(stringResource(R.string.Pressure), "${item.main.pressure} ${stringResource(R.string.hPa)}")
+                WeatherInfoItem(stringResource(R.string.Clouds), "${item.clouds.all}${
+                    stringResource(
+                        R.string.percentage
+                    )
+                }")
+                WeatherInfoItem(stringResource(R.string.Visibility), "${item.visibility / 1000} ${stringResource(R.string.km)}")
+                WeatherInfoItem(stringResource(R.string.WindSpeed), "${item.wind.speed} ${
+                    stringResource(
+                        R.string.MeterPerSecond
+                    )
+                }")
+                WeatherInfoItem(stringResource(R.string.WindDirection), "${item.wind.deg}°")
                 item.wind.gust?.let {
-                    WeatherInfoItem("Wind Gust", "$it m/s")
+                    WeatherInfoItem(stringResource(R.string.WindGust), "$it ${stringResource(R.string.MeterPerSecond)}")
                 }
             }
         }

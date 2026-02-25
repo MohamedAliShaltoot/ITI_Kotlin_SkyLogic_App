@@ -26,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 
@@ -103,7 +105,7 @@ val isLoading = viewModel.isLoading
                 item {
 
                     Text(
-                        "HOURLY FORECAST",
+                        stringResource(R.string.HOURLYFORECAST),
                         color = Color.White.copy(alpha = 0.6f),
                         fontSize = 12.sp,
                         letterSpacing = 1.sp,

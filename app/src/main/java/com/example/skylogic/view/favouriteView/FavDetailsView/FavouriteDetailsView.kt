@@ -20,11 +20,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.skylogic.R
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.weatherView.reusable.formatDay
 import java.time.LocalDate
@@ -206,19 +208,19 @@ fun FavoriteDetailsScreen(
 
                                 Spacer(Modifier.height(24.dp))
 
-                                // ── Stat chips row ────────────────────
+                                // Stat chips row
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     StatChip(
-                                        label = "Feels",
+                                        label = stringResource(R.string.FeelsLike),
                                         value = "${weather.feelsLike}°C",
                                         modifier = Modifier.weight(1f)
                                     )
                                     StatChip(
-                                        label = "Humidity",
-                                        value = "${weather.humidity}%",
+                                        label =  stringResource(R.string.Humidity),
+                                        value = "${weather.humidity}${stringResource(R.string.percentage)}",
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -230,13 +232,13 @@ fun FavoriteDetailsScreen(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     StatChip(
-                                        label = "Wind",
-                                        value = "${weather.windSpeed} m/s",
+                                        label = stringResource(R.string.Wind),
+                                        value = "${weather.windSpeed} ${stringResource(R.string.MeterPerSecond)}",
                                         modifier = Modifier.weight(1f)
                                     )
                                     StatChip(
-                                        label = "Pressure",
-                                        value = "${weather.pressure} hPa",
+                                        label = stringResource(R.string.Pressure),
+                                        value = "${weather.pressure} ${stringResource(R.string.hPa)}",
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -252,7 +254,7 @@ fun FavoriteDetailsScreen(
 
                     if (todayList.isNotEmpty()) {
                         item {
-                            SectionHeader(title = "Today")
+                            SectionHeader(title = stringResource(R.string.Today))
                         }
                         items(todayList) { item ->
                             ForecastCard(item)

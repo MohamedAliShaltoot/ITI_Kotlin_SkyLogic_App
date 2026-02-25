@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.example.skylogic.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,7 +85,7 @@ fun FavouriteView(
                         }
                         Column {
                             Text(
-                                text = "Favorite Locations",
+                                text = stringResource(R.string.FavoriteLocations),
                                 color = FavouriteViewColors.TextPrimary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
@@ -91,7 +93,7 @@ fun FavouriteView(
                             )
                             if (favorites.isNotEmpty()) {
                                 Text(
-                                    text = "${favorites.size} saved place${if (favorites.size > 1) "s" else ""}",
+                                    text = "${favorites.size} ${stringResource(R.string.savedPlace)}${if (favorites.size > 1) stringResource(R.string.s) else ""}",
                                     color = FavouriteViewColors.TextSecondary,
                                     fontSize = 12.sp
                                 )

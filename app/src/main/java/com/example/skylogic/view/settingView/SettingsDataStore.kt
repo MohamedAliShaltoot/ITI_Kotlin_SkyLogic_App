@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.Locale
 
 private val Context.dataStore by preferencesDataStore("settings")
 
@@ -69,11 +70,24 @@ class SettingsDataStore(private val context: Context) {
             it[LANGUAGE] = value
         }
     }
+
     suspend fun saveCustomLocation(lat: Double, lon: Double) {
         context.dataStore.edit {
             it[LAT] = lat
             it[LON] = lon
         }
+    }
+    fun setAppLocale(context: Context, languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = context.resources.configuration
+        config.setLocale(locale)
+
+        context.resources.updateConfiguration(
+            config,
+            context.resources.displayMetrics
+        )
     }
 
 }

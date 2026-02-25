@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.skylogic.R
 
 @Composable
 fun RotatingWindArrow(degrees: Int) {
@@ -22,7 +24,7 @@ fun RotatingWindArrow(degrees: Int) {
 
     Icon(
         imageVector = Icons.Default.Navigation,
-        contentDescription = "Wind Direction",
+        contentDescription = stringResource(R.string.WindDirection),
         tint = Color(0xFF4DA3FF),
         modifier = Modifier
             .size(24.dp)
