@@ -31,8 +31,6 @@ class AlertViewModel(application: Application)
     private val remote = RemoteDataSource()
     private val local = LocalDataSource(application)
     private val appRepository = AppRepository(local ,remote)
-    private val scheduler = AlarmScheduler(application)
-
 
     fun getAllAlerts(): StateFlow<List<AlertEntity>> {
         return appRepository.getAllAlerts() .stateIn(

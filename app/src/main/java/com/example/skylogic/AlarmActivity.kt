@@ -2,11 +2,9 @@ package com.example.skylogic
 
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Looper
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,21 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.os.postDelayed
 import androidx.lifecycle.lifecycleScope
-import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.logging.Handler
+
 
 class AlarmActivity : ComponentActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
-    private var handler: Handler? = null
-    private val viewModel: WeatherViewModel by viewModels()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,9 +54,18 @@ class AlarmActivity : ComponentActivity() {
             }
         }
 
-
         setContent {
+
+            val title = intent.getStringExtra("TITLE") ?: "Weather Alert"
+            val city = intent.getStringExtra("CITY") ?: ""
+            val temp = intent.getDoubleExtra("TEMP", 0.0)
+            val description = intent.getStringExtra("DESCRIPTION") ?: ""
+
             AlarmScreen(
+                title = title,
+                city = city,
+                temp = temp,
+                description = description,
                 onStop = {
                     stopAlarm()
                     finish()
@@ -91,12 +92,36 @@ class AlarmActivity : ComponentActivity() {
     }
 }
 @Composable
-fun AlarmScreen(onStop: () -> Unit) {
+fun AlarmScreen(
+    title: String,
+    city: String,
+    temp: Double,
+    description: String,
+    onStop: () -> Unit
+) {
+
+    val backgroundColor = when (title) {
+        "rain" -> Color(0xFF1565C0)
+        "snow" -> Color(0xFF546E7A)
+        "wind" -> Color(0xFF37474F)
+        "temp_high" -> Color(0xFFD32F2F)
+        "temp_low" -> Color(0xFF0288D1)
+        else -> Color(0xFF0D47A1)
+    }
+
+    val emoji = when (title) {
+        "rain" -> "🌧"
+        "snow" -> "❄"
+        "wind" -> "🌬"
+        "temp_high" -> "🌡"
+        "temp_low" -> "🥶"
+        else -> "⚠"
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1)),
+            .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
 
@@ -105,12 +130,36 @@ fun AlarmScreen(onStop: () -> Unit) {
         ) {
 
             Text(
-                text = stringResource(R.string.Weather_Alert),
+                text = "$emoji Weather Alert",
                 color = Color.White,
-                style = MaterialTheme.typography.displayMedium
+                style = MaterialTheme.typography.displayLarge
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "📍 $city",
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Condition: ${description.replaceFirstChar { it.uppercase() }}",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Temp: $temp°C",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = onStop,
@@ -119,8 +168,12 @@ fun AlarmScreen(onStop: () -> Unit) {
                 ),
                 shape = CircleShape
             ) {
-                Text(stringResource(R.string.STOP), color = Color.White)
+                Text(
+                    text = "STOP ALARM",
+                    color = Color.White
+                )
             }
         }
     }
 }
+

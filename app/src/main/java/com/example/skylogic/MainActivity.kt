@@ -112,18 +112,6 @@ fun WeatherScreen(
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context) }
 
-//    val permissionLauncher =
-//        rememberLauncherForActivityResult(
-//            contract = ActivityResultContracts.RequestPermission()
-//        ) { isGranted ->
-//            if (isGranted) {
-//                locationHelper.getCurrentLocation { location ->
-//                    location?.let {
-//                        viewModel.fetchWeather(it.latitude, it.longitude)
-//                    }
-//                }
-//            }
-//        }
     val permissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
@@ -157,9 +145,6 @@ fun WeatherScreen(
     }
 
     Scaffold(
-//        bottomBar = {
-//            BottomNavBar(navController)
-//        }
         bottomBar = {
             if (currentRoute in bottomBarScreens) {
                 BottomNavBar(navController)
@@ -169,7 +154,6 @@ fun WeatherScreen(
 
         NavHost(
             navController = navController,
-          //  startDestination = Screen.Splash.route,
             startDestination = when (startDestination) {
                 "alerts" -> Screen.Alerts.route
                 else -> Screen.Splash.route
