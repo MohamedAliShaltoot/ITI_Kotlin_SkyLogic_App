@@ -21,9 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 import coil.compose.AsyncImage
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.utils.GlassCard
@@ -72,11 +74,11 @@ fun ExpandableDailyCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "H ${maxTemp.toInt()}°  L ${minTemp.toInt()}°",
+                        "${stringResource(R.string.H)} ${maxTemp.toInt()}°  ${stringResource(R.string.L)} ${minTemp.toInt()}°",
                         color = Color.White
                     )
                     Text(
-                        "Rain ${maxRain.toInt()}%",
+                        "${stringResource(R.string.Rain)} ${maxRain.toInt()}%",
                         color = Color.Cyan,
                         fontSize = 12.sp
                     )
@@ -89,10 +91,18 @@ fun ExpandableDailyCard(
                 Divider(color = Color.White.copy(alpha = 0.2f))
                 Spacer(Modifier.height(12.dp))
 
-                WeatherInfoItem("Avg Humidity", "${avgHumidity.toInt()}%")
-                WeatherInfoItem("Avg Wind", "${avgWind.toInt()} m/s")
-                WeatherInfoItem("Pressure Range",
-                    "${dayItems.minOf { it.main.pressure }} - ${dayItems.maxOf { it.main.pressure }} hPa"
+                WeatherInfoItem(stringResource(R.string.AvgHumidity), "${avgHumidity.toInt()}%")
+                WeatherInfoItem(stringResource(R.string.AvgWind), "${avgWind.toInt()} ${
+                    stringResource(
+                        R.string.MeterPerSecond
+                    )
+                }")
+                WeatherInfoItem(stringResource(R.string.PressureRange),
+                    "${dayItems.minOf { it.main.pressure }} - ${dayItems.maxOf { it.main.pressure }} ${
+                        stringResource(
+                            R.string.hPa
+                        )
+                    }"
                 )
             }
         }

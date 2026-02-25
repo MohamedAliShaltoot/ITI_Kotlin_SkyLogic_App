@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 
 // Empty State
 @Composable fun EmptyFavoritesState(modifier: Modifier = Modifier) {
@@ -54,13 +56,14 @@ import androidx.compose.ui.unit.sp
                 )
             }
             Text(
-                text = "No favorites yet",
+                text = stringResource(R.string.Nofavoritesyet),
                 color = FavouriteViewColors.Companion.TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp
             )
             Text(
-                text = "Tap + to save your favorite\nweather locations",
+                //text = "Tap + to save your favorite\nweather locations",
+                text = stringResource(R.string.Taptosaveyourfavorite),
                 color = FavouriteViewColors.Companion.TextSecondary,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,

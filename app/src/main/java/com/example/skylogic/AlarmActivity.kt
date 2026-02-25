@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.postDelayed
 import androidx.lifecycle.lifecycleScope
@@ -104,7 +105,7 @@ fun AlarmScreen(onStop: () -> Unit) {
         ) {
 
             Text(
-                text = "Weather Alert!",
+                text = stringResource(R.string.Weather_Alert),
                 color = Color.White,
                 style = MaterialTheme.typography.displayMedium
             )
@@ -118,7 +119,7 @@ fun AlarmScreen(onStop: () -> Unit) {
                 ),
                 shape = CircleShape
             ) {
-                Text("STOP", color = Color.White)
+                Text(stringResource(R.string.STOP), color = Color.White)
             }
         }
     }

@@ -28,16 +28,12 @@ class WeatherViewModel(application: Application)
 
     var isLoading by mutableStateOf(false)
         private set
-    //private val weatherService = RetrofitInstance.api
 
     suspend fun getCityCoordinates(query: String): List<GeoResponse> {
-
-       // return weatherService.getCityCoordinates(query)
         return appRepository.getCityCoordinates(query)
     }
 
     suspend fun reverseGeocode(lat: Double, lon: Double): List<GeoResponse> {
-        //return weatherService.reverseGeocode(lat, lon)
         return appRepository.reverseGeocode(lat, lon)
     }
 

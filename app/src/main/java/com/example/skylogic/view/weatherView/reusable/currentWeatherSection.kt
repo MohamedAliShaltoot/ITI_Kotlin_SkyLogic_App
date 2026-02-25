@@ -15,10 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.skylogic.R
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.utils.GlassCard
 
@@ -31,11 +33,15 @@ fun CurrentWeatherSection(
     val windSpeed = convertWindSpeed(weather.wind.speed, windUnit)
 
     GlassCard(
-        modifier = Modifier.fillMaxWidth().padding(36.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(36.dp)
     ) {
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -67,7 +73,7 @@ fun CurrentWeatherSection(
             )
 
             Text(
-                "Feels like ${weather.main.feels_like.toInt()}°",
+                "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}°",
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = 14.sp
             )
@@ -81,8 +87,8 @@ fun CurrentWeatherSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                WeatherInfoItem("High", "${weather.main.temp_max.toInt()}°")
-                WeatherInfoItem("Low", "${weather.main.temp_min.toInt()}°")
+                WeatherInfoItem(stringResource(R.string.High), "${weather.main.temp_max.toInt()}°")
+                WeatherInfoItem(stringResource(R.string.Low), "${weather.main.temp_min.toInt()}°")
             }
 
             Spacer(Modifier.height(12.dp))
@@ -91,10 +97,10 @@ fun CurrentWeatherSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                WeatherInfoItem("Humidity", "${weather.main.humidity}%")
+                WeatherInfoItem(stringResource(R.string.Humidity), "${weather.main.humidity}%")
                 WeatherInfoItem(
-                    "Wind",
-                    "${windSpeed.toInt()} ${if (windUnit == "miles/hour") "mph" else "m/s"}"
+                    stringResource(R.string.Wind),
+                    "${windSpeed.toInt()} ${if (windUnit == "miles/hour") stringResource(R.string.mph) else stringResource(R.string.MeterPerSecond)}"
                 )
             }
 
@@ -104,13 +110,13 @@ fun CurrentWeatherSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                WeatherInfoItem("Pressure", "${weather.main.pressure} hPa")
-                WeatherInfoItem("Sunrise", formatUnixTime(weather.sys.sunrise))
+                WeatherInfoItem(stringResource(R.string.Pressure), "${weather.main.pressure} ${stringResource(R.string.hPa)}")
+                WeatherInfoItem(stringResource(R.string.Sunrise), formatUnixTime(weather.sys.sunrise))
             }
 
             Spacer(Modifier.height(12.dp))
 
-            WeatherInfoItem("Sunset", formatUnixTime(weather.sys.sunset))
+            WeatherInfoItem(stringResource(R.string.Sunset), formatUnixTime(weather.sys.sunset))
         }
     }
 }

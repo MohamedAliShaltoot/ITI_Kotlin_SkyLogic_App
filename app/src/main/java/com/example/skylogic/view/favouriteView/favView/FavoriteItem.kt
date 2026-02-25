@@ -31,11 +31,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.skylogic.R
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
 
@@ -43,7 +45,7 @@ import com.example.skylogic.data.local.fav.FavoriteEntity
 fun FavoriteItem(
     favorite: FavoriteEntity,
     weather: CachedWeatherEntity?,
-    onDelete: () -> Unit,
+    onDelete:  () -> Unit,
     onClick: () -> Unit,
     onAppear: () -> Unit
 ) {
@@ -149,7 +151,7 @@ fun FavoriteItem(
                         }
                     } else {
                         Text(
-                            text = "Loading weather…",
+                            text = stringResource(R.string.Loadingweather),
                             color = FavouriteViewColors.TextSecondary.copy(alpha = 0.6f),
                             fontSize = 13.sp
                         )

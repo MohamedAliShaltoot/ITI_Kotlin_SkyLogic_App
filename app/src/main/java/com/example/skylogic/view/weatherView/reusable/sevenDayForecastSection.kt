@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 import com.example.skylogic.models.ForecastItem
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -20,7 +22,7 @@ fun SevenDayForecastSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
         Text(
-            "5-DAY FORECAST",
+            stringResource(R.string.FiveDAYFORECAST),
             color = Color.Gray,
             fontSize = 12.sp,
             letterSpacing = 1.sp

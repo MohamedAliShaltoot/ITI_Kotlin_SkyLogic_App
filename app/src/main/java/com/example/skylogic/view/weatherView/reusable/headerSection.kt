@@ -18,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.skylogic.R
 import com.example.skylogic.models.CurrentWeatherResponse
 
 @Composable
@@ -90,12 +92,16 @@ fun HeaderSection(weather: CurrentWeatherResponse) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            MiniHeaderInfo("Visibility", "${weather.visibility / 1000} km")
-            MiniHeaderInfo("Clouds", weather.weather.first().main)
+            MiniHeaderInfo(stringResource(R.string.Visibility), "${weather.visibility / 1000} ${
+                stringResource(
+                    R.string.km
+                )
+            }")
+            MiniHeaderInfo(stringResource(R.string.Clouds), weather.weather.first().main)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                 Text(
-                    "Wind",
+                    stringResource(R.string.Wind),
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 11.sp
                 )
