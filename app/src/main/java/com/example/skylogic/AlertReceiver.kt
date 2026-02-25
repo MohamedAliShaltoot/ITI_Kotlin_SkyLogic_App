@@ -21,9 +21,6 @@ class AlertReceiver : BroadcastReceiver() {
         }
     }
 
-
-
-
     private fun showNotification(context: Context) {
 
         val channelId = "weather_alert_channel"
@@ -32,7 +29,6 @@ class AlertReceiver : BroadcastReceiver() {
             context.getSystemService(Context.NOTIFICATION_SERVICE)
                     as NotificationManager
 
-        // Create channel (required API 26+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val channel = NotificationChannel(
@@ -45,7 +41,7 @@ class AlertReceiver : BroadcastReceiver() {
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.mipmap.app_icon) // change later
+            .setSmallIcon(R.mipmap.app_icon)
             .setContentTitle("Weather Alert")
             .setContentText("Severe weather detected!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -70,44 +66,3 @@ class AlertReceiver : BroadcastReceiver() {
 
 
 }
-//    private fun playAlarmSound(context: Context) {
-//
-//        val alarmSound: Uri = RingtoneManager
-//            .getDefaultUri(RingtoneManager.TYPE_ALARM)
-//
-//        val ringtone =
-//            RingtoneManager.getRingtone(context, alarmSound)
-//
-//        ringtone.play()
-//    }
-//private fun openAlarmScreen(context: Context) {
-//
-//    val intent = Intent(context, AlarmActivity::class.java).apply {
-//        flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-//                Intent.FLAG_ACTIVITY_CLEAR_TOP
-//    }
-//
-//    context.startActivity(intent)
-//}
-
-
-//    override fun onReceive(context: Context, intent: Intent) {
-//
-//        val type = intent.getStringExtra("type") ?: "notification"
-//
-//        if (type == "notification") {
-//            showNotification(context)
-//        } else {
-//            playAlarmSound(context)
-//        }
-//    }
-//override fun onReceive(context: Context, intent: Intent) {
-//
-//    val type = intent.getStringExtra("TYPE") ?: "notification"
-//
-//    if (type == "notification") {
-//        showNotification(context)
-//    } else {
-//        openAlarmScreen(context)
-//    }
-//}
