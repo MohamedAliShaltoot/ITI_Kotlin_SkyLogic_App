@@ -49,6 +49,8 @@
     <string name="km">كم</string>
     <string name="percentage">%</string>
     <string name="hPa">هيكتوباسكال</string>
+    <string name="Confirm_Location">تاكيد المكان</string>
+    <string name="SearchCity">البحث عن مدينة</string>
     <string name="mph">ميل في الساعه</string>
     <string name="FiveDAYFORECAST">توقعات الطقس لخمسة أيام</string>
     <string name="HOURLYFORECAST">توقعات الطقس كل ثلاث ساعة</string>

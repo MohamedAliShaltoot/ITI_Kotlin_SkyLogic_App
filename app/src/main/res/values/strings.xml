@@ -15,6 +15,8 @@
     <string name="mileshour">miles/hour</string>
     <string name="Language">Language</string>
     <string name="English">English</string>
+    <string name="Confirm_Location">Confirm Location</string>
+    <string name="SearchCity">Search city...</string>
     <string name="Arabic">Arabic</string>
     <string name="noCachedDataAvailable">No cached data available</string>
     <string name="FavoriteLocations">Favorite Locations</string>
