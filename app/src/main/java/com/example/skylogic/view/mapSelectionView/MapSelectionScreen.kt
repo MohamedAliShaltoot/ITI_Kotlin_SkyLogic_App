@@ -49,6 +49,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.ui.res.stringResource
+import com.example.skylogic.R
 
 
 @Composable
@@ -179,7 +181,7 @@ fun MapSelectionScreen(
                 value = searchQuery,
                 onValueChange = { mapViewModel.onSearchQueryChanged(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search city...") },
+                placeholder = { Text(stringResource(R.string.SearchCity)) },
                 shape = RoundedCornerShape(20.dp)
             )
 
@@ -255,7 +257,6 @@ fun MapSelectionScreen(
                         lon = it.longitude
                     )
                     // show SnackBar
-                  //  Toast.makeText(context, "${cityName} added to favorites", Toast.LENGTH_SHORT).show()
                     scope.launch {
                         snackbarHostState.showSnackbar(
                             message = "$cityName added to favorites",
@@ -297,7 +298,7 @@ fun MapSelectionScreen(
             shape = RoundedCornerShape(16.dp)
         )
         {
-            Text("Confirm Location", color = Color.White)
+            Text(stringResource(R.string.Confirm_Location), color = Color.White)
         }
     }
          }
