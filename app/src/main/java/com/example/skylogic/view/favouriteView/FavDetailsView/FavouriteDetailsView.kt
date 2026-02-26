@@ -146,7 +146,7 @@ fun FavoriteDetailsScreen(
                                     trackColor = FavoriteDetailsViewColors.SkyAccent.copy(alpha = 0.2f)
                                 )
                                 Text(
-                                    text = "Fetching weather…",
+                                    text = stringResource(R.string.Fetchingweather),
                                     color = FavoriteDetailsViewColors.TextSecondary,
                                     fontSize = 14.sp
                                 )
@@ -167,7 +167,7 @@ fun FavoriteDetailsScreen(
                                     modifier = Modifier.size(52.dp)
                                 )
                                 Text(
-                                    text = "No cached data available",
+                                    text = stringResource(R.string.noCachedDataAvailable),
                                     color = FavoriteDetailsViewColors.TextSecondary,
                                     fontSize = 14.sp
                                 )

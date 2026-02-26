@@ -1,5 +1,6 @@
 package com.example.skylogic.view.settingView
 
+import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
@@ -19,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.skylogic.R
 import com.example.skylogic.models.Screen
 import com.example.skylogic.utils.GlassCard
 import com.example.skylogic.view.settingView.reusable.RadioGroup
@@ -46,6 +50,9 @@ fun SettingsScreen(
     val condition = weatherViewModel.currentWeather
         ?.weather?.firstOrNull()?.description
 
+    val context      = LocalContext.current
+    val activity     = context as? Activity
+
     val targetGradient = getWeatherGradient(condition)
 
     val animatedColors = targetGradient.map { targetColor ->
@@ -62,14 +69,14 @@ fun SettingsScreen(
     ) {
 
         item {
-            ScreenTitle("Settings")
+            ScreenTitle(stringResource(id = R.string.Settings))
         }
 
         item {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
 
                 SettingSectionTitle(
-                    title = "Location",
+                    title = stringResource(id = R.string.Location),
                     icon = Icons.Default.LocationOn
                 )
                 RadioGroup(
@@ -93,7 +100,7 @@ fun SettingsScreen(
             GlassCard(modifier = Modifier.fillMaxWidth()) {
 
                 SettingSectionTitle(
-                    title = "Temperature Unit",
+                    title = stringResource(id = R.string.TemperatureUnit),
                     icon = Icons.Default.Cloud
                 )
 
@@ -131,7 +138,7 @@ fun SettingsScreen(
             GlassCard(modifier = Modifier.fillMaxWidth()) {
 
                 SettingSectionTitle(
-                    title = "Wind Speed Unit",
+                    title = stringResource(id = R.string.WindSpeedUnit),
                     icon = Icons.Default.Air
                 )
 
@@ -148,39 +155,22 @@ fun SettingsScreen(
             GlassCard(modifier = Modifier.fillMaxWidth()) {
 
                 SettingSectionTitle(
-                    title = "Language",
+                    title = stringResource(id = R.string.Language),
                     icon = Icons.Default.Language
                 )
 
-
                 RadioGroup(
-                    options = listOf("English", "Arabic"),
+                   // options = listOf("English", "Arabic"),
+                    options = listOf(stringResource(id = R.string.English), stringResource(id = R.string.Arabic)),
                     selected = language,
                     onSelect = { selected ->
 
                         viewModel.setLanguage(selected)
 
-                        val apiLang =
-                            if (selected == "Arabic") "ar" else "en"
+                        val languageCode = if (selected == "Arabic") "ar" else "en"
+                        applyLocale(context, languageCode)
 
-                        val apiUnit = when (tempUnit) {
-                            "Celsius" -> "metric"
-                            "Fahrenheit" -> "imperial"
-                            "Kelvin" -> "standard"
-                            else -> "metric"
-                        }
-
-                        val currentWeather =
-                            weatherViewModel.currentWeather
-
-                        currentWeather?.let {
-                            weatherViewModel.fetchWeather(
-                                lat = it.coord.lat,
-                                lon = it.coord.lon,
-                                units = apiUnit,
-                                lang = apiLang
-                            )
-                        }
+                        activity?.recreate()
                     }
                 )
             }

@@ -1,10 +1,21 @@
 package com.example.skylogic.models
 
-sealed class Screen(val route: String) {
-    object Splash       : Screen("splash")
-    object Home : Screen("home")
-    object Favourite : Screen("favourite")
-    object Alerts : Screen("alerts")
-    object Settings : Screen("settings")
-    object MapSelection : Screen("map_selection")
+import com.example.skylogic.R
+
+//sealed class Screen(val route: String) {
+//    object Splash       : Screen("splash")
+//    object Home : Screen("home")
+//    object Favourite : Screen("favourite")
+//    object Alerts : Screen("alerts")
+//    object Settings : Screen("settings")
+//    object MapSelection : Screen("map_selection")
+//}
+
+sealed class Screen(val route: String, val labelRes: Int) {
+    object Home      : Screen("home",      R.string.nav_home)
+    object Favourite : Screen("favourite", R.string.nav_favourite)
+    object Alerts    : Screen("alerts",    R.string.nav_alerts)
+    object Settings  : Screen("settings",  R.string.nav_settings)
+    object Splash       : Screen("splash",        0)
+    object MapSelection : Screen("map_selection", 0)
 }

@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -64,10 +65,14 @@ import com.example.skylogic.view.alertsView.AlertViewModel
 import com.example.skylogic.view.favouriteView.FavDetailsView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.view.favouriteView.favView.FavouriteView
+import com.example.skylogic.view.settingView.SettingsDataStore
 import com.example.skylogic.view.settingView.SettingsScreen
+import com.example.skylogic.view.settingView.applyLocale
 import com.example.skylogic.view.weatherView.reusable.LocationPermissionDeniedView
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import com.example.skylogic.view.weatherView.reusable.WeatherContent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     @androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
@@ -75,6 +80,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val dataStore = SettingsDataStore(this)
+        val savedLanguage = runBlocking {
+            dataStore.language.first()
+        }
+        val languageCode = if (savedLanguage == "Arabic") "ar" else "en"
+        applyLocale(this, languageCode)
         val destination = intent?.getStringExtra("DESTINATION")
         setContent {
             SkyLogicTheme {
@@ -131,15 +143,21 @@ fun WeatherScreen(
     val savedLat = settingsViewModel.lat.collectAsState().value
     val savedLon = settingsViewModel.lon.collectAsState().value
     val locationMode = settingsViewModel.locationMode.collectAsState().value
+    val language     = settingsViewModel.language.collectAsState().value
+    val tempUnit     = settingsViewModel.tempUnit.collectAsState().value
 
-    LaunchedEffect(savedLat, savedLon, locationMode) {
+    // Derived values so fetchWeather always uses correct params
+    val apiLang = if (language == "Arabic") "ar" else "en"
+    val apiUnit = when (tempUnit) {
+        "Celsius"    -> "metric"
+        "Fahrenheit" -> "imperial"
+        else         -> "standard"
+    }
 
+    LaunchedEffect(savedLat, savedLon, locationMode, apiLang, apiUnit) {
         if (locationMode == "Map" && savedLat != null && savedLon != null) {
-
-            viewModel.fetchWeather(savedLat, savedLon)
-
+            viewModel.fetchWeather(savedLat, savedLon, apiUnit, apiLang)
         } else if (locationMode == "GPS") {
-
             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
@@ -284,7 +302,7 @@ fun BottomNavBar(navController: NavController) {
             val selected = currentRoute == screen.route
 
             BottomItem(
-                label = screen.route.replaceFirstChar { it.uppercase() },
+                label = stringResource(screen.labelRes),
                 icon = when (screen) {
                     Screen.Home -> Icons.Default.Home
                     Screen.Favourite -> Icons.Default.Favorite

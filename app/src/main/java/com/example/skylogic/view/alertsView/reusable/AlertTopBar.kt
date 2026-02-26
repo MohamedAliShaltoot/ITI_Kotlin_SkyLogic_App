@@ -11,9 +11,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 
 //Top Bar
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +28,7 @@ import androidx.compose.ui.unit.sp
             .padding(top = 52.dp, bottom = 16.dp)
     ) {
         Text(
-            text = "ALERTS",
+            text = stringResource(R.string.ALERTS),
             fontSize = 11.sp,
             letterSpacing = 4.sp,
             color = AlertColors.AccentCyan,
@@ -34,7 +36,7 @@ import androidx.compose.ui.unit.sp
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Weather Triggers",
+            text = stringResource(R.string.Weather_Triggers),
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             color = AlertColors.TextPrimary

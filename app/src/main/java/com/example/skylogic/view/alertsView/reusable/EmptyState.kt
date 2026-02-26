@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 
 //Empty State
 @Composable
@@ -43,10 +45,10 @@ import androidx.compose.ui.unit.sp
                 )
             }
             Spacer(Modifier.height(20.dp))
-            Text("No alerts set", color = AlertColors.TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+            Text(stringResource(R.string.No_alerts_set), color = AlertColors.TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Tap + to create your first weather alert",
+                stringResource(R.string.Tap_create_your_weather_alert),
                 color = AlertColors.TextSub,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
