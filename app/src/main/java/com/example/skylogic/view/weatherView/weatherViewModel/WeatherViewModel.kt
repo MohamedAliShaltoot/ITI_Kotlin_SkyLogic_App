@@ -48,21 +48,34 @@ class WeatherViewModel(application: Application)
         try {
             isLoading = true
 
+//            currentWeather =
+//                RetrofitInstance.api.getCurrentWeather(
+//                    lat,
+//                    lon,
+//                    units,
+//                    lang
+//                )
             currentWeather =
-                RetrofitInstance.api.getCurrentWeather(
+                appRepository.getCurrentWeather(
                     lat,
                     lon,
                     units,
                     lang
                 )
-
             forecast =
-                RetrofitInstance.api.getForecast(
+                appRepository.getForecast(
                     lat,
                     lon,
                     units,
                     lang
                 ).list
+//            forecast =
+//                RetrofitInstance.api.getForecast(
+//                    lat,
+//                    lon,
+//                    units,
+//                    lang
+//                ).list
 
         } catch (e: Exception) {
             e.printStackTrace()

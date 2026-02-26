@@ -50,8 +50,8 @@ fun SettingsScreen(
     val condition = weatherViewModel.currentWeather
         ?.weather?.firstOrNull()?.description
 
-    val context      = LocalContext.current
-    val activity     = context as? Activity
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     val targetGradient = getWeatherGradient(condition)
 
