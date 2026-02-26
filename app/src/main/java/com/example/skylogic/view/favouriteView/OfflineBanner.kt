@@ -19,45 +19,34 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun OfflineBanner() {
-    var bannerVisible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        bannerVisible = true
-    }
-
-    AnimatedVisibility(
-        visible = bannerVisible,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { -it })
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            Color(0xFF7B0000),
-                            Color(0xFFB00020),
-                            Color(0xFF7B0000)
-                        )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFF7B0000),
+                        Color(0xFFB00020),
+                        Color(0xFF7B0000)
                     )
                 )
-                .padding(vertical = 10.dp, horizontal = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "⚠  No Internet Connection",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    letterSpacing = 0.4.sp
-                )
-                Text(
-                    text = "Showing cached data",
-                    color = Color.White.copy(alpha = 0.75f),
-                    fontSize = 11.sp
-                )
-            }
+            )
+            .padding(vertical = 10.dp, horizontal = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "⚠  No Internet Connection",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                letterSpacing = 0.4.sp
+            )
+            Text(
+                text = "Showing cached data",
+                color = Color.White.copy(alpha = 0.75f),
+                fontSize = 11.sp
+            )
         }
     }
 }
