@@ -18,26 +18,31 @@ import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.repository.AppRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.java
-
-class AlertViewModel(application: Application)
-    : AndroidViewModel(application) {
+class AlertViewModel(application: Application) : AndroidViewModel(application) {
 
     private val remote = RemoteDataSource()
     private val local = LocalDataSource(application)
-    private val appRepository = AppRepository(local ,remote)
+    private val appRepository = AppRepository(local, remote)
 
-    fun getAllAlerts(): StateFlow<List<AlertEntity>> {
-        return appRepository.getAllAlerts() .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            emptyList()
-        )
+    private val _uiState = MutableStateFlow<AlertUiState>(AlertUiState.Loading)
+    val uiState: StateFlow<AlertUiState> = _uiState
+
+    init {
+        viewModelScope.launch {
+            appRepository.getAllAlerts().collect { list ->
+                _uiState.value = when {
+                    list.isEmpty() -> AlertUiState.Empty
+                    else           -> AlertUiState.Success(list)
+                }
+            }
+        }
     }
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
@@ -48,94 +53,45 @@ class AlertViewModel(application: Application)
         condition: String,
         threshold: Double?
     ) {
-
         viewModelScope.launch {
-            val id = appRepository.insertAlert(
-                AlertEntity(
-                    startTime = start,
-                    endTime = end,
-                    type = type,
-                    condition = condition,
-                    threshold = threshold
-                )
-            )
-
-            val alertId = id.toInt()
-
-            val workRequest =
-                PeriodicWorkRequestBuilder<WeatherAlertWorker>(
-                    15, TimeUnit.MINUTES
-                )
-                    .setInputData(
-                        workDataOf("ALERT_ID" to alertId)
+            try {
+                val id = appRepository.insertAlert(
+                    AlertEntity(
+                        startTime = start,
+                        endTime   = end,
+                        type      = type,
+                        condition = condition,
+                        threshold = threshold
                     )
+                )
+                val alertId = id.toInt()
+                val workRequest = PeriodicWorkRequestBuilder<WeatherAlertWorker>(15, TimeUnit.MINUTES)
+                    .setInputData(workDataOf("ALERT_ID" to alertId))
                     .build()
 
-            WorkManager.getInstance(getApplication())
-                .enqueueUniquePeriodicWork(
-                    "weather_alert_$alertId",
-                    ExistingPeriodicWorkPolicy.REPLACE,
-                    workRequest
-                )
+                WorkManager.getInstance(getApplication())
+                    .enqueueUniquePeriodicWork(
+                        "weather_alert_$alertId",
+                        ExistingPeriodicWorkPolicy.REPLACE,
+                        workRequest
+                    )
+            } catch (e: Exception) {
+                _uiState.value = AlertUiState.Error(e.message ?: "Failed to add alert")
+            }
         }
     }
-
 
     fun deleteAlert(alert: AlertEntity) {
-
         viewModelScope.launch {
-            //repository.delete(alert)
-            appRepository.deleteAlert(alert)
-            WorkManager.getInstance(getApplication())
-                .cancelUniqueWork("weather_alert_${alert.id}")
+            try {
+                appRepository.deleteAlert(alert)
+                WorkManager.getInstance(getApplication())
+                    .cancelUniqueWork("weather_alert_${alert.id}")
+            } catch (e: Exception) {
+                _uiState.value = AlertUiState.Error(e.message ?: "Failed to delete alert")
+            }
         }
     }
 
-
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-
-    private fun scheduleAlarm(alert: AlertEntity) {
-
-        val context = getApplication<Application>()
-
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE)
-                    as AlarmManager
-
-        val intent = Intent(context, AlertReceiver::class.java).apply {
-            putExtra("type", alert.type)
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            alert.id, // unique requestCode
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            alert.startTime,
-            pendingIntent
-        )
-    }
-
-    private fun cancelAlarm(alert: AlertEntity) {
-
-        val context = getApplication<Application>()
-
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val intent = Intent(context, AlertReceiver::class.java)
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            alert.id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        alarmManager.cancel(pendingIntent)
-    }
 }
+
