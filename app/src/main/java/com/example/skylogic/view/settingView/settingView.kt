@@ -2,6 +2,7 @@ package com.example.skylogic.view.settingView
 
 import android.app.Activity
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -17,7 +18,12 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
@@ -40,9 +46,11 @@ import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 fun SettingsScreen(
     weatherViewModel: WeatherViewModel,
     viewModel: SettingsViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    isOffline: Boolean = false
 ) {
 
+    var showOfflineError by remember { mutableStateOf(false) }
     val locationMode = viewModel.locationMode.collectAsState().value
     val tempUnit = viewModel.tempUnit.collectAsState().value
     val windUnit = viewModel.windUnit.collectAsState().value
@@ -54,7 +62,17 @@ fun SettingsScreen(
     val activity = context as? Activity
 
     val targetGradient = getWeatherGradient(condition)
-
+// Show error snackbar/toast when user tries to change while offline
+    LaunchedEffect(showOfflineError) {
+        if (showOfflineError) {
+            Toast.makeText(
+                context,
+                "No internet connection. Settings cannot be changed offline.",
+                Toast.LENGTH_SHORT
+            ).show()
+            showOfflineError = false
+        }
+    }
     val animatedColors = targetGradient.map { targetColor ->
         animateColorAsState(targetColor, label = "").value
     }
@@ -109,7 +127,10 @@ fun SettingsScreen(
                     options = listOf("Kelvin", "Celsius", "Fahrenheit"),
                     selected = tempUnit,
                     onSelect = { selected ->
-
+                        if (isOffline) {
+                            showOfflineError = true
+                            return@RadioGroup
+                        }
                         viewModel.setTempUnit(selected)
 
                         val apiUnit = when (selected) {
@@ -164,7 +185,10 @@ fun SettingsScreen(
                     options = listOf(stringResource(id = R.string.English), stringResource(id = R.string.Arabic)),
                     selected = language,
                     onSelect = { selected ->
-
+                        if (isOffline) {
+                            showOfflineError = true
+                            return@RadioGroup
+                        }
                         viewModel.setLanguage(selected)
 
                         val languageCode = if (selected == "Arabic") "ar" else "en"
