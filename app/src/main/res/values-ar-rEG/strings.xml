@@ -52,4 +52,24 @@
     <string name="mph">ميل في الساعه</string>
     <string name="FiveDAYFORECAST">توقعات الطقس لخمسة أيام</string>
     <string name="HOURLYFORECAST">توقعات الطقس كل ثلاث ساعة</string>
+    <string name="Create_Alert">إنشاء تنبيه</string>
+    <string name="Save_Alert">حفظ التنبيه</string>
+    <string name="valid_input">أدخل رقمًا صالحًا</string>
+    <string name="Condition">الشرط</string>
+    <string name="Alarm">إنذار</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_favourite">المفضلة</string>
+    <string name="nav_alerts">التنبيهات</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="noCachedDataAvailable">لا توجد بيانات محفوظه</string>
+    <string name="Notification">إشعار</string>
+    <string name="Alert_Type">نوع التنبيه</string>
+    <string name="Start">البداية</string>
+    <string name="End">النهاية</string>
+    <string name="Time_Window">الفترة الزمنية</string>
+    <string name="Set_A_Weather_Condition_Trigger">تعيين مشغّل لحالة الطقس</string>
+    <string name="ALERTS">التنبيهات</string>
+    <string name="Tap_create_your_weather_alert">اضغط على + لإنشاء أول تنبيه للطقس</string>
+    <string name="No_alerts_set">لا توجد تنبيهات مُعيّنة</string>
+    <string name="Weather_Triggers">مشغّلات الطقس</string>
 </resources>

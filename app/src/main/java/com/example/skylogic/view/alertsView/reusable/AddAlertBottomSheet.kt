@@ -40,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skylogic.R
 import kotlin.collections.chunked
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -95,22 +97,22 @@ fun AddAlertBottomSheet(
             Spacer(Modifier.height(20.dp))
 
             Text(
-                "Create Alert",
+                stringResource(R.string.Create_Alert),
                 color = AlertColors.TextPrimary,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
-            Text("Set a weather condition trigger", color = AlertColors.TextSub, fontSize = 13.sp)
+            Text(stringResource(R.string.Set_A_Weather_Condition_Trigger), color = AlertColors.TextSub, fontSize = 13.sp)
 
             Spacer(Modifier.height(28.dp))
 
             // Time Section
-            SheetSectionLabel("Time Window")
+            SheetSectionLabel(stringResource(R.string.Time_Window))
             Spacer(Modifier.height(10.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Start", color =AlertColors. TextSub, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.Start), color =AlertColors. TextSub, fontSize = 11.sp, letterSpacing = 1.sp)
                     Spacer(Modifier.height(6.dp))
                     DateTimePicker(
                         initialTimestamp = startTime,
@@ -118,7 +120,7 @@ fun AddAlertBottomSheet(
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("End", color = AlertColors.TextSub, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.End), color = AlertColors.TextSub, fontSize = 11.sp, letterSpacing = 1.sp)
                     Spacer(Modifier.height(6.dp))
                     DateTimePicker(
                         initialTimestamp = endTime,
@@ -132,18 +134,18 @@ fun AddAlertBottomSheet(
             Spacer(Modifier.height(26.dp))
 
             // Alert Type
-            SheetSectionLabel("Alert Type")
+            SheetSectionLabel(stringResource(R.string.Alert_Type))
             Spacer(Modifier.height(10.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 TypeChip(
-                    label = "Notification",
+                    label = stringResource(R.string.Notification),
                     icon = Icons.Outlined.Notifications,
                     selected = selectedType == "notification",
                     onClick = { selectedType = "notification" }
                 )
                 TypeChip(
-                    label = "Alarm",
+                    label = stringResource(R.string.Alarm),
                     icon = Icons.Outlined.Alarm,
                     selected = selectedType == "alarm",
                     onClick = { selectedType = "alarm" }
@@ -155,7 +157,7 @@ fun AddAlertBottomSheet(
             Spacer(Modifier.height(26.dp))
 
             // Condition
-            SheetSectionLabel("Condition")
+            SheetSectionLabel(stringResource(R.string.Condition))
             Spacer(Modifier.height(12.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -208,7 +210,7 @@ fun AddAlertBottomSheet(
                         ),
                         shape = RoundedCornerShape(14.dp),
                         supportingText = {
-                            if (isError) Text("Enter a valid number", color = AlertColors.AccentRed, fontSize = 11.sp)
+                            if (isError) Text(stringResource(R.string.valid_input), color = AlertColors.AccentRed, fontSize = 11.sp)
                         }
                     )
                 }
@@ -233,25 +235,8 @@ fun AddAlertBottomSheet(
                     contentColor = AlertColors.BgDeep
                 )
             ) {
-                Text("Save Alert", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.Save_Alert), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
 }
-
-/*
-// Save
-val needsThreshold = selectedCondition.contains("temp") || selectedCondition == "wind"
-val isThresholdValid = !needsThreshold || (thresholdText.isNotEmpty() && thresholdText.toDoubleOrNull() != null)
-
-Button(
-    onClick = {
-        onSave(startTime, endTime, selectedType, selectedCondition, thresholdText.toDoubleOrNull())
-    },
-    enabled = isThresholdValid,   // <-- add this
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(54.dp),
-    ...
-)
- */

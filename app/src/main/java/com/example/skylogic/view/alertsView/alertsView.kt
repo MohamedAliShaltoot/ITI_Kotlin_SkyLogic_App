@@ -34,7 +34,7 @@ import java.util.*
 @androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
 @Composable
 fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
-  //  val alerts by viewModel.alerts.collectAsState()
+
     val alerts by viewModel.getAllAlerts().collectAsState()
     var showSheet by remember { mutableStateOf(false) }
 

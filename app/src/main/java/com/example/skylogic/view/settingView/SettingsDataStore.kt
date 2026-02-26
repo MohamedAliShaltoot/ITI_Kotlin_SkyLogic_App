@@ -10,6 +10,14 @@ import java.util.Locale
 
 private val Context.dataStore by preferencesDataStore("settings")
 
+fun applyLocale(context: Context, languageCode: String) {
+    val locale = Locale(languageCode)
+    Locale.setDefault(locale)
+    val config = context.resources.configuration
+    config.setLocale(locale)
+    context.createConfigurationContext(config)
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
+}
 class SettingsDataStore(private val context: Context) {
 
     companion object {
