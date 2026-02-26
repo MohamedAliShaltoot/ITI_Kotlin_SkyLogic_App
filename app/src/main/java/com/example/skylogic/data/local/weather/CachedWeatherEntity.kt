@@ -5,10 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "cached_weather")
 data class CachedWeatherEntity(
+    @PrimaryKey val locationKey: String,
 
-    @PrimaryKey
-    val locationKey: String,
-
+    // flat fields — used by FavoriteItem & FavoriteDetailsScreen
     val name: String,
     val temp: Double,
     val feelsLike: Double,
@@ -17,6 +16,10 @@ data class CachedWeatherEntity(
     val windSpeed: Double,
     val description: String,
     val icon: String,
+
+    // full JSON — used by WeatherViewModel (home screen needs complete response)
+    val weatherJson: String,
+
     val timestamp: Long
 )
 

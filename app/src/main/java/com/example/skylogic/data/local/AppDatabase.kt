@@ -20,7 +20,7 @@ import com.example.skylogic.data.local.weather.CachedWeatherEntity
         CachedForecastEntity::class,
         AlertEntity::class
     ],
-    version = 6
+    version = 7
 )
 
 abstract class AppDatabase : RoomDatabase() {
