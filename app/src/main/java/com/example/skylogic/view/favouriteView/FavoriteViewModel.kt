@@ -93,6 +93,7 @@ class FavoriteViewModel(application: Application) : AndroidViewModel(application
                     windSpeed = response.wind.speed,
                     description = response.weather[0].description,
                     icon = response.weather[0].icon,
+                    weatherJson = Gson().toJson(response),
                     timestamp = System.currentTimeMillis()
                 )
                 appRepository.insertCachedWeather(entity)
@@ -140,6 +141,7 @@ class FavoriteViewModel(application: Application) : AndroidViewModel(application
                     windSpeed = weatherResponse.wind.speed,
                     description = weatherResponse.weather[0].description,
                     icon = weatherResponse.weather[0].icon,
+                    weatherJson = Gson().toJson(weatherResponse),
                     timestamp = System.currentTimeMillis()
                 )
                 appRepository.insertCachedWeather(weatherEntity)

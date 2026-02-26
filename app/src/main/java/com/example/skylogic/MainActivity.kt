@@ -62,8 +62,10 @@ import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
 import com.example.skylogic.view.alertsView.AlertScreen
 import com.example.skylogic.view.alertsView.AlertViewModel
+import com.example.skylogic.view.favouriteView.ConnectivityObserver
 import com.example.skylogic.view.favouriteView.FavDetailsView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
+import com.example.skylogic.view.favouriteView.NetworkState
 import com.example.skylogic.view.favouriteView.favView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsDataStore
 import com.example.skylogic.view.settingView.SettingsScreen
@@ -124,6 +126,11 @@ fun WeatherScreen(
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context) }
 
+    val connectivityObserver = remember { ConnectivityObserver(context) }
+    val networkState by connectivityObserver.observe().collectAsState(
+        initial = NetworkState.Available
+    )
+    val isOffline = networkState is NetworkState.Unavailable
     val permissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
@@ -146,7 +153,6 @@ fun WeatherScreen(
     val language     = settingsViewModel.language.collectAsState().value
     val tempUnit     = settingsViewModel.tempUnit.collectAsState().value
 
-    // Derived values so fetchWeather always uses correct params
     val apiLang = if (language == "Arabic") "ar" else "en"
     val apiUnit = when (tempUnit) {
         "Celsius"    -> "metric"
@@ -215,7 +221,8 @@ fun WeatherScreen(
                 } else {
                     WeatherContent(
                         viewModel = viewModel,
-                        settingsViewModel = settingsViewModel
+                        settingsViewModel = settingsViewModel,
+                        isOffline = isOffline
                     )
                 }
             }
@@ -264,14 +271,13 @@ fun WeatherScreen(
                 )
             }
             composable(Screen.Settings.route) {
-            SettingsScreen(
-                weatherViewModel = viewModel,
-                viewModel = settingsViewModel,
-                navController = navController
-
-
-            )
-        }
+                SettingsScreen(
+                    weatherViewModel = viewModel,
+                    viewModel = settingsViewModel,
+                    navController = navController,
+                    isOffline = isOffline
+                )
+            }
         }
     }
 }

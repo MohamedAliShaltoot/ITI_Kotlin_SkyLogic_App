@@ -2,7 +2,12 @@ package com.example.skylogic.view.weatherView.reusable
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,114 +27,138 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.skylogic.R
+import com.example.skylogic.view.favouriteView.OfflineBanner
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
+import com.example.skylogic.view.weatherView.WeatherUiState
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherContent(
     viewModel: WeatherViewModel,
-    settingsViewModel: SettingsViewModel
-)
+    settingsViewModel: SettingsViewModel,
+   isOffline: Boolean = false
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val windUnit by settingsViewModel.windUnit.collectAsState()
 
-{
 
-    val weather = viewModel.currentWeather
-    val hourly = viewModel.getHourlyData()
-    val daily = viewModel.getDailyData()
-    val condition = weather?.weather?.firstOrNull()?.description
-    val targetGradient = getWeatherGradient(condition)
-    val windUnit = settingsViewModel.windUnit.collectAsState().value
-val isLoading = viewModel.isLoading
-    val animatedColors = targetGradient.map { targetColor ->
-        animateColorAsState(targetColor, label = "").value
+    val weather = when (val s = uiState) {
+        is WeatherUiState.Success       -> s.weather
+        is WeatherUiState.CachedSuccess -> s.weather
+        else                            -> null
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
 
-        ) { innerPadding ->
-        if (isLoading) {
+    val condition = weather?.weather?.firstOrNull()?.description
+    val targetGradient = getWeatherGradient(condition)
+    val animatedColors = targetGradient.map { animateColorAsState(it, label = "").value }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
-                    color =  Color(0xFF4DA3FF)
-                )
+    Scaffold(containerColor = Color.Transparent) { innerPadding ->
+        when (uiState) {
+
+            is WeatherUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = Color(0xFF4DA3FF)
+                    )
+                }
             }
 
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(animatedColors)
-                    )
-
-                    .padding(innerPadding)
-                    .statusBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                item {
-                    Spacer(Modifier.height(16.dp))
-                }
-
-                weather?.let {
-
-                    item {
-                        HeaderSection(it)
-                        Spacer(Modifier.height(24.dp))
-                    }
-
-                    item {
-                        CurrentWeatherSection(it, windUnit)
-
-                        Spacer(Modifier.height(28.dp))
-                    }
-                }
-                item {
-
+            is WeatherUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Brush.verticalGradient(animatedColors))
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        stringResource(R.string.HOURLYFORECAST),
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontSize = 12.sp,
-                        letterSpacing = 1.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp)
+                        text = "⚠ ${(uiState as WeatherUiState.Error).message}",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(24.dp)
                     )
+                }
+            }
 
-                    Spacer(Modifier.height(12.dp))
+            is WeatherUiState.Success,
+            is WeatherUiState.CachedSuccess -> {
+               // val isOffline = uiState is WeatherUiState.CachedSuccess
+                val hourly = viewModel.getHourlyData()
+                val daily  = viewModel.getDailyData()
 
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(hourly) { item ->
-                            ExpandableHourlyCard(item)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Brush.verticalGradient(animatedColors))
+                        .padding(innerPadding)
+                        .statusBarsPadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Offline banner
+                    if (isOffline) {
+
+                        item {
+                            AnimatedVisibility(
+                                visible = isOffline,
+                                enter = expandVertically() + fadeIn(),
+                                exit  = shrinkVertically() + fadeOut()
+                            ) {
+                                OfflineBanner()
+                            }
                         }
                     }
 
-                    Spacer(Modifier.height(28.dp))
-                }
-                item {
-                    SevenDayForecastSection(daily)
-                    Spacer(Modifier.height(24.dp))
+                    item { Spacer(Modifier.height(16.dp)) }
+
+                    weather?.let {
+                        item {
+                            HeaderSection(it)
+                            Spacer(Modifier.height(24.dp))
+                        }
+                        item {
+                            CurrentWeatherSection(it, windUnit)
+                            Spacer(Modifier.height(28.dp))
+                        }
+                    }
+
+                    item {
+                        Text(
+                            stringResource(R.string.HOURLYFORECAST),
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 12.sp,
+                            letterSpacing = 1.sp,
+                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp)
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(hourly) { item -> ExpandableHourlyCard(item) }
+                        }
+                        Spacer(Modifier.height(28.dp))
+                    }
+
+                    item {
+                        SevenDayForecastSection(daily)
+                        Spacer(Modifier.height(24.dp))
+                    }
                 }
             }
         }
