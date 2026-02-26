@@ -23,6 +23,15 @@ import kotlinx.coroutines.launch
 
 class FavoriteViewModel(application: Application)
     : AndroidViewModel(application) {
+    private val observer = ConnectivityObserver(application)
+
+    val networkState: StateFlow<NetworkState> =
+        observer.observe()
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                NetworkState.Available
+            )
     private val remote = RemoteDataSource()
     private val local = LocalDataSource(application)
     private val appRepository = AppRepository(local ,remote)
@@ -68,30 +77,28 @@ class FavoriteViewModel(application: Application)
             appRepository.deleteFavorite(favorite)
         }
     }
-
     fun loadWeatherForFavorite(lat: Double, lon: Double) {
 
         viewModelScope.launch {
 
             val key = "$lat,$lon"
-
             val cached = appRepository.getCachedWeather(key)
 
-            val now = System.currentTimeMillis()
-            val isFresh =
-                cached != null && (now - cached.timestamp) < 30 * 60 * 1000
+            val isOnline = networkState.value is NetworkState.Available
 
-            if (isFresh) {
-                _weatherMap.value =
-                    _weatherMap.value.toMutableMap().apply {
-                        put(key, cached)
-                    }
+            if (!isOnline) {
+                cached?.let {
+                    _weatherMap.value =
+                        _weatherMap.value.toMutableMap().apply {
+                            put(key, it)
+                        }
+                }
                 return@launch
             }
 
             try {
                 val response =
-                    RetrofitInstance.api.getCurrentWeather(lat, lon)
+                    appRepository.getCurrentWeather(lat, lon)
 
                 val entity = CachedWeatherEntity(
                     locationKey = key,
@@ -101,12 +108,10 @@ class FavoriteViewModel(application: Application)
                     humidity = response.main.humidity,
                     pressure = response.main.pressure,
                     windSpeed = response.wind.speed,
-                   // clouds = response.,
                     description = response.weather[0].description,
                     icon = response.weather[0].icon,
-                    timestamp = now
+                    timestamp = System.currentTimeMillis()
                 )
-
 
                 appRepository.insertCachedWeather(entity)
 
@@ -116,81 +121,78 @@ class FavoriteViewModel(application: Application)
                     }
 
             } catch (e: Exception) {
-                if (cached != null) {
+
+                cached?.let {
                     _weatherMap.value =
                         _weatherMap.value.toMutableMap().apply {
-                            put(key, cached)
+                            put(key, it)
                         }
                 }
             }
         }
     }
-fun loadForecast(lat: Double, lon: Double) {
+    fun loadForecast(lat: Double, lon: Double) {
+        val key = "$lat,$lon"
 
-    val key = "$lat,$lon"
+        viewModelScope.launch {
+            val cached = appRepository.getCachedForecast(key)
+            val isOnline = networkState.value is NetworkState.Available
+            if (!isOnline) {
+                cached?.let {
+                    val list: List<ForecastItem> = Gson().fromJson(
+                        it.forecastJson,
+                        object : TypeToken<List<ForecastItem>>() {}.type
+                    )
+                    _forecastMap.value = _forecastMap.value.toMutableMap().apply {
+                        put(key, list)
+                    }
+                }
+                return@launch
+            }
 
-    viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val isFresh = cached != null && (now - cached.timestamp) < 30 * 60 * 1000
 
-        //val cached = forecastDao.getForecast(key)
-        val cached = appRepository.getCachedForecast(key)
-
-
-        val now = System.currentTimeMillis()
-        val isFresh =
-            cached != null && (now - cached.timestamp) < 30 * 60 * 1000
-
-        if (isFresh) {
-
-            val list: List<ForecastItem> =
-                Gson().fromJson(
+            if (isFresh) {
+                val list: List<ForecastItem> = Gson().fromJson(
                     cached.forecastJson,
                     object : TypeToken<List<ForecastItem>>() {}.type
                 )
-
-            _forecastMap.value =
-                _forecastMap.value.toMutableMap().apply {
+                _forecastMap.value = _forecastMap.value.toMutableMap().apply {
                     put(key, list)
                 }
+                return@launch
+            }
 
-            return@launch
-        }
+            try {
+               // val response = RetrofitInstance.api.getForecast(lat, lon)
+                val response = appRepository.getForecast(lat, lon)
+                val json = Gson().toJson(response.list)
 
-        try {
-
-            val response =
-                RetrofitInstance.api.getForecast(lat, lon)
-
-            val json = Gson().toJson(response.list)
-
-            appRepository.insertCachedForecast(
-                CachedForecastEntity(
-                    locationKey = key,
-                    forecastJson = json,
-                    timestamp = now
+                appRepository.insertCachedForecast(
+                    CachedForecastEntity(
+                        locationKey = key,
+                        forecastJson = json,
+                        timestamp = now
+                    )
                 )
-            )
 
-            _forecastMap.value =
-                _forecastMap.value.toMutableMap().apply {
+                _forecastMap.value = _forecastMap.value.toMutableMap().apply {
                     put(key, response.list)
                 }
 
-        } catch (e: Exception) {
-
-            if (cached != null) {
-
-                val list: List<ForecastItem> =
-                    Gson().fromJson(
-                        cached.forecastJson,
+            } catch (e: Exception) {
+                cached?.let {
+                    val list: List<ForecastItem> = Gson().fromJson(
+                        it.forecastJson,
                         object : TypeToken<List<ForecastItem>>() {}.type
                     )
-
-                _forecastMap.value =
-                    _forecastMap.value.toMutableMap().apply {
+                    _forecastMap.value = _forecastMap.value.toMutableMap().apply {
                         put(key, list)
                     }
+                }
             }
         }
     }
-}
+
 }
