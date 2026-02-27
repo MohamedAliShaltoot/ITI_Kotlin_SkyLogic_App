@@ -18,6 +18,8 @@
     <string name="Confirm_Location">Confirm Location</string>
     <string name="SearchCity">Search city...</string>
     <string name="Arabic">Arabic</string>
+    <string name="notification_allow">Allow</string>
+    <string name="notification_deny">Deny</string>
     <string name="noCachedDataAvailable">No cached data available</string>
     <string name="FavoriteLocations">Favorite Locations</string>
     <string name="removedfromfavorites">removed from favorites</string>
