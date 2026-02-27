@@ -82,7 +82,7 @@ class FavoriteViewModel(application: Application) : AndroidViewModel(application
             }
 
             try {
-                val response = appRepository.getCurrentWeather(lat, lon)
+                val response = appRepository.getCurrentWeather(lat, lon,units = "metric", lang = "en")
                 val entity = CachedWeatherEntity(
                     locationKey = key,
                     name = response.name,

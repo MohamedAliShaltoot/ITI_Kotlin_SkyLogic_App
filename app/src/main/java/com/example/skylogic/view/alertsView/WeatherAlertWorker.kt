@@ -41,6 +41,10 @@ class WeatherAlertWorker(
 
         val now = System.currentTimeMillis()
 
+        // respecting start time
+        if (now < alert.startTime) {
+            return Result.success()
+        }
         // Check duration validity
         if (now > alert.endTime) {
             WorkManager.getInstance(applicationContext)
@@ -186,6 +190,7 @@ private fun openAlarmScreen(
             "DESCRIPTION",
             matchedItem.weather.firstOrNull()?.description ?: ""
         )
+        putExtra("END_TIME", alert.endTime)
     }
 
     applicationContext.startActivity(intent)

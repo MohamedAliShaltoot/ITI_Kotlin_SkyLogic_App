@@ -1,86 +1,88 @@
 package com.example.skylogic.data.repository
 
+import com.example.skylogic.data.local.ILocalDataSource
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
 import com.example.skylogic.data.local.forcast.CachedForecastEntity
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
+import com.example.skylogic.data.remote.IRemoteDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.models.ForecastResponse
 import com.example.skylogic.models.GeoResponse
 import kotlinx.coroutines.flow.Flow
 
-class AppRepository(val localDataSource: LocalDataSource , val remoteDataSource: RemoteDataSource) {
+class AppRepository(val localDataSource: ILocalDataSource, val remoteDataSource: IRemoteDataSource) : IAppRepository {
 
     // localDataSource :
 
     // Alert Methods
-    suspend fun insertAlert(alert: AlertEntity) : Long {
+  override  suspend fun insertAlert(alert: AlertEntity) : Long {
        return localDataSource.insertAlert(alert)
     }
-    suspend fun deleteAlert(alert: AlertEntity) {
+    override  suspend fun deleteAlert(alert: AlertEntity) {
         localDataSource.deleteAlert(alert)
     }
-    suspend fun getAlertById(id: Int): AlertEntity? {
+    override suspend fun getAlertById(id: Int): AlertEntity? {
         return localDataSource.getAlertById(id)
     }
-    fun getAllAlerts(): Flow<List<AlertEntity>> {
+    override fun getAllAlerts(): Flow<List<AlertEntity>> {
         return localDataSource.getAllAlerts()
     }
 
     // Favorite Methods
-    suspend fun insertFavorite(favorite: FavoriteEntity) {
+    override suspend fun insertFavorite(favorite: FavoriteEntity) {
         localDataSource.insertFavorite(favorite)
     }
-    suspend fun deleteFavorite(favorite: FavoriteEntity) {
+    override suspend fun deleteFavorite(favorite: FavoriteEntity) {
         localDataSource.deleteFavorite(favorite)
     }
-    fun getAllFavorites(): Flow<List<FavoriteEntity>> {
+    override fun getAllFavorites(): Flow<List<FavoriteEntity>> {
         return localDataSource.getAllFavorites()
     }
 
     // Cached Weather Methods
-    suspend fun insertCachedWeather(weather: CachedWeatherEntity) {
+    override suspend fun insertCachedWeather(weather: CachedWeatherEntity) {
         localDataSource.insertCachedWeather(weather)
     }
-    suspend fun getCachedWeather(locationKey: String): CachedWeatherEntity? {
+    override  suspend fun getCachedWeather(locationKey: String): CachedWeatherEntity? {
         return localDataSource.getCachedWeather(locationKey)
 
     }
 
     // Cached Forecast Methods
-    suspend fun insertCachedForecast(forecast: CachedForecastEntity) {
+    override suspend fun insertCachedForecast(forecast: CachedForecastEntity) {
         localDataSource.insertCachedForecast(forecast)
     }
-    suspend fun getCachedForecast(locationKey: String): CachedForecastEntity? {
+    override  suspend fun getCachedForecast(locationKey: String): CachedForecastEntity? {
         return localDataSource.getCachedForecast(locationKey)
     }
 
     // remoteDataSource
-    suspend fun getCurrentWeather(
+    override  suspend fun getCurrentWeather(
         lat: Double,
         lon: Double,
-        units: String = "metric",
-        lang: String = "en"
+        units: String ,
+        lang: String
     ): CurrentWeatherResponse {
         return remoteDataSource.getCurrentWeather(lat, lon, units, lang)
     }
 
-    suspend fun getForecast(
+    override   suspend fun getForecast(
         lat: Double,
         lon: Double,
-        units: String = "metric",
-        lang: String = "en"
+        units: String ,
+        lang: String
     ): ForecastResponse {
         return remoteDataSource.getForecast(lat, lon, units, lang)
     }
 
-    suspend fun getCityCoordinates(city: String): List<GeoResponse> {
+    override   suspend fun getCityCoordinates(city: String): List<GeoResponse> {
         return remoteDataSource.getCityCoordinates(city)
     }
 
-    suspend fun reverseGeocode(
+    override  suspend fun reverseGeocode(
         lat: Double,
         lon: Double
     ): List<GeoResponse> {

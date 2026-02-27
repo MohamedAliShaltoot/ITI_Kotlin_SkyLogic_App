@@ -45,9 +45,9 @@
             android:theme="@style/Theme.SkyLogic"
             tools:targetApi="27" />
 
-        <receiver
-            android:name=".AlertReceiver"
-            android:exported="false" />
+<!--        <receiver-->
+<!--            android:name=".AlertReceiver"-->
+<!--            android:exported="false" />-->
 
 
     </application>

@@ -6,13 +6,13 @@ import com.example.skylogic.models.GeoResponse
 
 class RemoteDataSource(
     private val service: WeatherService = RetrofitInstance.api
-) {
+) : IRemoteDataSource {
 
-    suspend fun getCurrentWeather(
+    override suspend fun getCurrentWeather(
         lat: Double,
         lon: Double,
-        units: String = "metric",
-        lang: String = "en"
+        units: String ,
+        lang: String
     ): CurrentWeatherResponse {
         return service.getCurrentWeather(
             lat = lat,
@@ -22,11 +22,11 @@ class RemoteDataSource(
         )
     }
 
-    suspend fun getForecast(
+    override  suspend fun getForecast(
         lat: Double,
         lon: Double,
-        units: String = "metric",
-        lang: String = "en"
+        units: String ,
+        lang: String
     ): ForecastResponse {
         return service.getForecast(
             lat = lat,
@@ -36,11 +36,11 @@ class RemoteDataSource(
         )
     }
 
-    suspend fun getCityCoordinates(city: String): List<GeoResponse> {
+    override   suspend fun getCityCoordinates(city: String): List<GeoResponse> {
         return service.getCityCoordinates(city)
     }
 
-    suspend fun reverseGeocode(
+    override suspend fun reverseGeocode(
         lat: Double,
         lon: Double
     ): List<GeoResponse> {

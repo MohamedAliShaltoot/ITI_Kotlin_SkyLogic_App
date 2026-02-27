@@ -2,16 +2,20 @@ package com.example.skylogic.view.settingView.settingViewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.skylogic.view.settingView.ISettingsDataStore
 import com.example.skylogic.view.settingView.SettingsDataStore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(application: Application) :
+class SettingsViewModel(application: Application,
+                        private val dataStore: ISettingsDataStore = SettingsDataStore(application)) :
     AndroidViewModel(application) {
 
-    private val dataStore = SettingsDataStore(application)
+   // private val dataStore = SettingsDataStore(application)
     val lat = dataStore.lat.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
     val lon = dataStore.lon.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
 
@@ -55,5 +59,22 @@ class SettingsViewModel(application: Application) :
         viewModelScope.launch {
             dataStore.saveLanguage(value)
         }
+    }
+}
+
+
+class SettingsViewModelFactory(
+    private val application: Application
+) : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SettingsViewModel(
+                application = application,
+                dataStore = SettingsDataStore(application)
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
