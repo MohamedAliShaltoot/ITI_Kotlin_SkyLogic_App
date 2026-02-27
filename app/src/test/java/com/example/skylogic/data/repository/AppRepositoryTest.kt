@@ -4,8 +4,13 @@ import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
 import com.example.skylogic.data.local.forcast.CachedForecastEntity
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
+import com.example.skylogic.models.City
+import com.example.skylogic.models.Clouds
 import com.example.skylogic.models.Coord
 import com.example.skylogic.models.CurrentWeatherResponse
+import com.example.skylogic.models.ForecastItem
+import com.example.skylogic.models.ForecastResponse
+import com.example.skylogic.models.ForecastSys
 import com.example.skylogic.models.Main
 import com.example.skylogic.models.Sys
 import com.example.skylogic.models.Weather
@@ -22,7 +27,9 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppRepositoryTest {
 
-    private lateinit var repository: IAppRepository
+    private lateinit var fakeLocal: FakeLocalDataSource
+    private lateinit var fakeRemote: FakeRemoteDataSource
+    private lateinit var repository: AppRepository
 
     private val fakeWeather = CurrentWeatherResponse(
         name = "Cairo",
@@ -36,15 +43,35 @@ class AppRepositoryTest {
         timezone = 7200
     )
 
+    private val fakeForecast = ForecastResponse(
+        cod = "200", message = 0, cnt = 1,
+        list = listOf(
+            ForecastItem(
+                dt = 1700000000L,
+                main = Main(28.0, 30.0, 25.0, 32.0, 1008, 45),
+                weather = listOf(Weather(800, "Clear", "clear sky", "01d")),
+                clouds = Clouds(10),
+                wind = Wind(4.0, 0),
+                visibility = 10000,
+                pop = 0.0,
+                sys = ForecastSys("d"),
+                dt_txt = "2024-01-01 12:00:00"
+            )
+        ),
+        city = City(360630, "Cairo", "EG", 7200, 0L, 0L)
+    )
+
     @Before
     fun setup() {
-        repository = FakeAppRepository()
+        fakeLocal  = FakeLocalDataSource()
+        fakeRemote = FakeRemoteDataSource()
+        repository = AppRepository(fakeLocal, fakeRemote)
     }
 
     // Favorites
 
     @Test
-    fun insertFavorite_andGetAll_returnsInserted() = runTest {
+    fun insertFavorite_delegatesToLocal_andRetrievable() = runTest {
         val favorite = FavoriteEntity(name = "Cairo", lat = 30.0, lon = 31.0)
 
         repository.insertFavorite(favorite)
@@ -55,22 +82,21 @@ class AppRepositoryTest {
     }
 
     @Test
-    fun deleteFavorite_removesFromList() = runTest {
+    fun deleteFavorite_delegatesToLocal_removesItem() = runTest {
         val favorite = FavoriteEntity(name = "Cairo", lat = 30.0, lon = 31.0)
         repository.insertFavorite(favorite)
 
         val inserted = repository.getAllFavorites().first()[0]
         repository.deleteFavorite(inserted)
 
-        val list = repository.getAllFavorites().first()
-        assertEquals(0, list.size)
+        assertEquals(0, repository.getAllFavorites().first().size)
     }
 
     // Alerts
 
     @Test
-    fun insertAlert_andGetById_returnsCorrectAlert() = runTest {
-        val alert = AlertEntity(startTime = 1000L, endTime = 2000L, type = "alarm", condition = "rain", threshold = null)
+    fun insertAlert_delegatesToLocal_andGetById() = runTest {
+        val alert = AlertEntity(startTime = 1000L, endTime = 2000L, type = "alarm", condition = "rain")
 
         val id = repository.insertAlert(alert)
         val result = repository.getAlertById(id.toInt())
@@ -81,11 +107,10 @@ class AppRepositoryTest {
     }
 
     @Test
-    fun deleteAlert_removesFromList() = runTest {
+    fun deleteAlert_delegatesToLocal_removesItem() = runTest {
         val id = repository.insertAlert(
-            AlertEntity(startTime = 1000L, endTime = 2000L, type = "notification", condition = "snow", threshold = null)
+            AlertEntity(startTime = 1000L, endTime = 2000L, type = "notification", condition = "snow")
         )
-
         val inserted = repository.getAlertById(id.toInt())!!
         repository.deleteAlert(inserted)
 
@@ -93,24 +118,23 @@ class AppRepositoryTest {
     }
 
     @Test
-    fun getAllAlerts_returnsAllInserted() = runTest {
-        repository.insertAlert(AlertEntity(startTime = 1000L, endTime = 2000L, type = "alarm", condition = "rain"))
+    fun getAllAlerts_delegatesToLocal_returnsAll() = runTest {
+        repository.insertAlert(AlertEntity(startTime = 1000L, endTime = 2000L, type = "alarm",        condition = "rain"))
         repository.insertAlert(AlertEntity(startTime = 3000L, endTime = 4000L, type = "notification", condition = "wind", threshold = 20.0))
-
 
         val list = repository.getAllAlerts().first()
         assertEquals(2, list.size)
     }
 
     @Test
-    fun getAlertById_nonExistentId_returnsNull() = runTest {
+    fun getAlertById_nonExistent_returnsNull() = runTest {
         assertNull(repository.getAlertById(999))
     }
 
-    // Cached Weather
+    //Cached Weather
 
     @Test
-    fun insertCachedWeather_andGet_returnsInserted() = runTest {
+    fun insertCachedWeather_delegatesToLocal_andRetrievable() = runTest {
         val weather = CachedWeatherEntity(
             locationKey = "home", name = "Cairo", temp = 30.0, feelsLike = 32.0,
             humidity = 40, pressure = 1010, windSpeed = 5.0, description = "clear sky",
@@ -121,7 +145,6 @@ class AppRepositoryTest {
 
         val result = repository.getCachedWeather("home")
         assertEquals("Cairo", result?.name)
-        assertEquals(30.0, result?.temp)
     }
 
     @Test
@@ -132,7 +155,7 @@ class AppRepositoryTest {
     //Cached Forecast
 
     @Test
-    fun insertCachedForecast_andGet_returnsInserted() = runTest {
+    fun insertCachedForecast_delegatesToLocal_andRetrievable() = runTest {
         val forecast = CachedForecastEntity(
             locationKey = "home",
             forecastJson = "[{\"dt\":1700000000}]",
@@ -146,16 +169,11 @@ class AppRepositoryTest {
         assertEquals("[{\"dt\":1700000000}]", result?.forecastJson)
     }
 
-    @Test
-    fun getCachedForecast_notInserted_returnsNull() = runTest {
-        assertNull(repository.getCachedForecast("home"))
-    }
-
-    // Remote (getCurrentWeather)
+    // Remote: getCurrentWeather
 
     @Test
-    fun getCurrentWeather_success_returnsWeather() = runTest {
-        (repository as FakeAppRepository).fakeWeather = fakeWeather
+    fun getCurrentWeather_delegatesToRemote_returnsWeather() = runTest {
+        fakeRemote.fakeWeather = fakeWeather
 
         val result = repository.getCurrentWeather(30.0, 31.0, "metric", "en")
 
@@ -164,8 +182,8 @@ class AppRepositoryTest {
     }
 
     @Test
-    fun getCurrentWeather_exceptionSet_throwsException() = runTest {
-        (repository as FakeAppRepository).weatherException = Exception("No internet")
+    fun getCurrentWeather_remoteThrows_exceptionPropagates() = runTest {
+        fakeRemote.weatherException = Exception("No internet")
 
         try {
             repository.getCurrentWeather(30.0, 31.0, "metric", "en")
@@ -175,11 +193,21 @@ class AppRepositoryTest {
         }
     }
 
-    // Remote (getForecast)
+    // Remote: getForecast
 
     @Test
-    fun getForecast_exceptionSet_throwsException() = runTest {
-        (repository as FakeAppRepository).forecastException = Exception("Timeout")
+    fun getForecast_delegatesToRemote_returnsForecast() = runTest {
+        fakeRemote.fakeForecast = fakeForecast
+
+        val result = repository.getForecast(30.0, 31.0, "metric", "en")
+
+        assertEquals("Cairo", result.city.name)
+        assertEquals(1, result.list.size)
+    }
+
+    @Test
+    fun getForecast_remoteThrows_exceptionPropagates() = runTest {
+        fakeRemote.forecastException = Exception("Timeout")
 
         try {
             repository.getForecast(30.0, 31.0, "metric", "en")

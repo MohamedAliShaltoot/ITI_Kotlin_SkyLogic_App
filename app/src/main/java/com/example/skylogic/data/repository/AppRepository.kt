@@ -1,17 +1,19 @@
 package com.example.skylogic.data.repository
 
+import com.example.skylogic.data.local.ILocalDataSource
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
 import com.example.skylogic.data.local.forcast.CachedForecastEntity
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
+import com.example.skylogic.data.remote.IRemoteDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.models.ForecastResponse
 import com.example.skylogic.models.GeoResponse
 import kotlinx.coroutines.flow.Flow
 
-class AppRepository(val localDataSource: LocalDataSource , val remoteDataSource: RemoteDataSource) : IAppRepository {
+class AppRepository(val localDataSource: ILocalDataSource, val remoteDataSource: IRemoteDataSource) : IAppRepository {
 
     // localDataSource :
 
