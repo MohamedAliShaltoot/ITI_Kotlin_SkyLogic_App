@@ -1,11 +1,7 @@
 package com.example.skylogic.view.alertsView
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,18 +9,15 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.example.skylogic.AlertReceiver
 import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.repository.AppRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.java
+
 class AlertViewModel(application: Application) : AndroidViewModel(application) {
 
     private val remote = RemoteDataSource()
