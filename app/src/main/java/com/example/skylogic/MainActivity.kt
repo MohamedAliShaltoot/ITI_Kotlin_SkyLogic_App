@@ -1,6 +1,7 @@
 package com.example.skylogic
 
 import android.Manifest
+import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -70,9 +71,11 @@ import com.example.skylogic.view.favouriteView.favView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsDataStore
 import com.example.skylogic.view.settingView.SettingsScreen
 import com.example.skylogic.view.settingView.applyLocale
+import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModelFactory
 import com.example.skylogic.view.weatherView.reusable.LocationPermissionDeniedView
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import com.example.skylogic.view.weatherView.reusable.WeatherContent
+import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModelFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -107,8 +110,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WeatherScreen(
     startDestination: String? = null,
-    viewModel: WeatherViewModel = viewModel(),
-    settingsViewModel: SettingsViewModel = viewModel()
+    viewModel: WeatherViewModel = viewModel(
+        factory = WeatherViewModelFactory(LocalContext.current.applicationContext as Application)
+    ),
+    settingsViewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
 ) {
 
     val navController = rememberNavController()

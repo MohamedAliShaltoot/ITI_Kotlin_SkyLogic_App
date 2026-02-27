@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.local.forcast.CachedForecastEntity
@@ -12,6 +14,7 @@ import com.example.skylogic.data.local.weather.CachedWeatherEntity
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.remote.RetrofitInstance
 import com.example.skylogic.data.repository.AppRepository
+import com.example.skylogic.data.repository.IAppRepository
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.models.GeoResponse
@@ -23,11 +26,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class WeatherViewModel(application: Application) : AndroidViewModel(application) {
+class WeatherViewModel(application: Application ,  private val appRepository: IAppRepository = AppRepository(
+    LocalDataSource(application),
+    RemoteDataSource()
+)) : AndroidViewModel(application) {
 
-    private val remote = RemoteDataSource()
-    private val local = LocalDataSource(application)
-    private val appRepository = AppRepository(local, remote)
 
     private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     val uiState: StateFlow<WeatherUiState> = _uiState.asStateFlow()
@@ -127,5 +130,26 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
+    }
+}
+
+
+
+class WeatherViewModelFactory(
+    private val application: Application
+) : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(WeatherViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return WeatherViewModel(
+                application = application,
+                appRepository = AppRepository(
+                    LocalDataSource(application),
+                    RemoteDataSource()
+                )
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

@@ -18,7 +18,7 @@ fun applyLocale(context: Context, languageCode: String) {
     context.createConfigurationContext(config)
     context.resources.updateConfiguration(config, context.resources.displayMetrics)
 }
-class SettingsDataStore(private val context: Context) {
+class SettingsDataStore(private val context: Context) : ISettingsDataStore{
 
     companion object {
         val LOCATION_MODE = stringPreferencesKey("location_mode")
@@ -29,73 +29,61 @@ class SettingsDataStore(private val context: Context) {
         val LON = doublePreferencesKey("lon")
 
     }
-    val lat: Flow<Double?> =
+    override val lat: Flow<Double?> =
         context.dataStore.data.map { it[LAT] }
 
-    val lon: Flow<Double?> =
+    override val lon: Flow<Double?> =
         context.dataStore.data.map { it[LON] }
 
-    val locationMode: Flow<String> =
+    override val locationMode: Flow<String> =
         context.dataStore.data.map {
             it[LOCATION_MODE] ?: "GPS"
         }
 
-    val tempUnit: Flow<String> =
+    override  val tempUnit: Flow<String> =
         context.dataStore.data.map {
             it[TEMP_UNIT] ?: "Celsius"
         }
 
-    val windUnit: Flow<String> =
+    override  val windUnit: Flow<String> =
         context.dataStore.data.map {
             it[WIND_UNIT] ?: "meter/sec"
         }
 
-    val language: Flow<String> =
+    override  val language: Flow<String> =
         context.dataStore.data.map {
             it[LANGUAGE] ?: "English"
         }
 
-    suspend fun saveLocationMode(value: String) {
+    override  suspend fun saveLocationMode(value: String) {
         context.dataStore.edit {
             it[LOCATION_MODE] = value
         }
     }
 
-    suspend fun saveTempUnit(value: String) {
+    override  suspend fun saveTempUnit(value: String) {
         context.dataStore.edit {
             it[TEMP_UNIT] = value
         }
     }
 
-    suspend fun saveWindUnit(value: String) {
+    override   suspend fun saveWindUnit(value: String) {
         context.dataStore.edit {
             it[WIND_UNIT] = value
         }
     }
 
-    suspend fun saveLanguage(value: String) {
+    override   suspend fun saveLanguage(value: String) {
         context.dataStore.edit {
             it[LANGUAGE] = value
         }
     }
 
-    suspend fun saveCustomLocation(lat: Double, lon: Double) {
+    override   suspend fun saveCustomLocation(lat: Double, lon: Double) {
         context.dataStore.edit {
             it[LAT] = lat
             it[LON] = lon
         }
-    }
-    fun setAppLocale(context: Context, languageCode: String) {
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = context.resources.configuration
-        config.setLocale(locale)
-
-        context.resources.updateConfiguration(
-            config,
-            context.resources.displayMetrics
-        )
     }
 
 }

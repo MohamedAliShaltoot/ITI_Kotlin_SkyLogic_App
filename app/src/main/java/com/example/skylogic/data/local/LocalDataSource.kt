@@ -7,11 +7,11 @@ import com.example.skylogic.data.local.forcast.CachedForecastEntity
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
 import kotlinx.coroutines.flow.Flow
 
-class LocalDataSource(context: Context) {
-    val alertDao = AppDatabase.getDatabase(context).alertDao()
-    val favoriteDao = AppDatabase.getDatabase(context).favoriteDao()
-    val cachedWeatherDao = AppDatabase.getDatabase(context).cachedWeatherDao()
-    val cachedForecastDao = AppDatabase.getDatabase(context).cachedForecastDao()
+class LocalDataSource(context: Context, database: AppDatabase = AppDatabase.getDatabase(context)) {
+    val alertDao = database.alertDao()
+    val favoriteDao = database.favoriteDao()
+    val cachedWeatherDao = database.cachedWeatherDao()
+    val cachedForecastDao = database.cachedForecastDao()
 
     // Alert Methods
     suspend fun insertAlert(alert: AlertEntity) : Long {
