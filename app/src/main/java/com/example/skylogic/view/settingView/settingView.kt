@@ -1,8 +1,13 @@
 package com.example.skylogic.view.settingView
 
+import android.Manifest
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -17,6 +22,7 @@ import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,12 +35,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.skylogic.R
 import com.example.skylogic.models.Screen
 import com.example.skylogic.utils.GlassCard
 import com.example.skylogic.view.settingView.reusable.RadioGroup
+import com.example.skylogic.view.settingView.reusable.RadioOption
 import com.example.skylogic.view.settingView.reusable.ScreenTitle
 import com.example.skylogic.view.settingView.reusable.SettingSectionTitle
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
@@ -60,9 +69,34 @@ fun SettingsScreen(
 
     val context = LocalContext.current
     val activity = context as? Activity
-
+    val hasNotificationPermission = remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) == PermissionChecker.PERMISSION_GRANTED
+            } else true
+        )
+    }
     val targetGradient = getWeatherGradient(condition)
-// Show error snackbar/toast when user tries to change while offline
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasNotificationPermission.value = isGranted
+        if (!isGranted) {
+            val intent = Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            ).apply {
+                data = Uri.fromParts(
+                    "package",
+                    context.packageName,
+                    null
+                )
+            }
+            context.startActivity(intent)
+        }
+    }
+
     LaunchedEffect(showOfflineError) {
         if (showOfflineError) {
             Toast.makeText(
@@ -98,7 +132,10 @@ fun SettingsScreen(
                     icon = Icons.Default.LocationOn
                 )
                 RadioGroup(
-                    options = listOf("GPS", "Map"),
+                    options = listOf(
+                        RadioOption("GPS", stringResource(R.string.GPS)),
+                        RadioOption("Map", stringResource(R.string.Map))
+                    ),
                     selected = locationMode,
                     onSelect = { selected ->
                         viewModel.setLocationMode(selected)
@@ -124,7 +161,11 @@ fun SettingsScreen(
 
 
                 RadioGroup(
-                    options = listOf("Kelvin", "Celsius", "Fahrenheit"),
+                    options = listOf(
+                        RadioOption("Kelvin",     stringResource(R.string.Kelvin)),
+                        RadioOption("Celsius",    stringResource(R.string.Celsius)),
+                        RadioOption("Fahrenheit", stringResource(R.string.Fahrenheit))
+                    ),
                     selected = tempUnit,
                     onSelect = { selected ->
                         if (isOffline) {
@@ -165,7 +206,10 @@ fun SettingsScreen(
 
 
                 RadioGroup(
-                    options = listOf("meter/sec", "miles/hour"),
+                    options = listOf(
+                        RadioOption("meter/sec",  stringResource(R.string.metersec)),
+                        RadioOption("miles/hour", stringResource(R.string.mileshour))
+                    ),
                     selected = windUnit,
                     onSelect = { viewModel.setWindUnit(it) }
                 )
@@ -181,8 +225,10 @@ fun SettingsScreen(
                 )
 
                 RadioGroup(
-                   // options = listOf("English", "Arabic"),
-                    options = listOf(stringResource(id = R.string.English), stringResource(id = R.string.Arabic)),
+                    options = listOf(
+                        RadioOption("English", stringResource(R.string.English)),
+                        RadioOption("Arabic",  stringResource(R.string.Arabic))
+                    ),
                     selected = language,
                     onSelect = { selected ->
                         if (isOffline) {
@@ -199,5 +245,41 @@ fun SettingsScreen(
                 )
             }
         }
+
+        // Notification Permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            item {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    SettingSectionTitle(
+                        title = stringResource(R.string.Notification),
+                        icon  = Icons.Default.Notifications
+                    )
+                    RadioGroup(
+                        options = listOf(
+                            RadioOption("granted", stringResource(R.string.notification_allow)),
+                            RadioOption("denied",  stringResource(R.string.notification_deny))
+                        ),
+                        selected = if (hasNotificationPermission.value) "granted" else "denied",
+                        onSelect = { key ->
+                            if (key == "granted" && !hasNotificationPermission.value) {
+                                notificationPermissionLauncher.launch(
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                            } else if (key == "denied" && hasNotificationPermission.value) {
+                                val intent = Intent(
+                                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                ).apply {
+                                    data = Uri.fromParts(
+                                        "package",
+                                        context.packageName,
+                                        null
+                                    )
+                                }
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                }
+            }}
     }
 }
