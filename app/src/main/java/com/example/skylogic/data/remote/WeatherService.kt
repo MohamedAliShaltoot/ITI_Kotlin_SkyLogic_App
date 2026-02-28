@@ -15,7 +15,7 @@ interface WeatherService {
         @Query("lon") lon: Double,
         @Query("units") units: String = "metric",
         @Query("lang") lang: String = "en",
-        @Query("appid") apiKey: String = AppConstants.API_KEY
+      //  @Query("appid") apiKey: String = AppConstants.API_KEY
     ): CurrentWeatherResponse
 
 
@@ -25,7 +25,7 @@ interface WeatherService {
         @Query("lon") lon: Double,
         @Query("units") units: String = "metric",
         @Query("lang") lang: String = "en",
-        @Query("appid") apiKey: String = AppConstants.API_KEY
+      //  @Query("appid") apiKey: String = AppConstants.API_KEY
     ): ForecastResponse
 
 
@@ -34,7 +34,7 @@ interface WeatherService {
     suspend fun getCityCoordinates(
         @Query("q") city: String,
         @Query("limit") limit: Int = 5,
-        @Query("appid") apiKey: String = AppConstants.API_KEY
+       // @Query("appid") apiKey: String = AppConstants.API_KEY
     ): List<GeoResponse>
 
 
@@ -44,7 +44,7 @@ interface WeatherService {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("limit") limit: Int = 1,
-        @Query("appid") apiKey: String = AppConstants.API_KEY
+     //   @Query("appid") apiKey: String = AppConstants.API_KEY
     ): List<GeoResponse>
 }
 
