@@ -90,7 +90,7 @@ fun MapSelectionScreen(
                     mapView       = mv,
                     point         = point,
                     title         = state.cityName,
-                    currentMarker = currentMarkerRef.value   // ← always latest
+                    currentMarker = currentMarkerRef.value
                 )
             }
         }
@@ -176,7 +176,7 @@ fun MapSelectionScreen(
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF4DA3FF))
             }
 
-            // Search Bar + Suggestions
+            // Search Bar and Suggestions
             Column(
                 Modifier.align(Alignment.TopCenter).padding(start = 82.dp, end = 16.dp)
             ) {
@@ -234,7 +234,7 @@ fun MapSelectionScreen(
                 onClick        = {
                     uiState.selectedPoint?.let {
                         favoriteViewModel.addFavorite(
-                            name = uiState.selectedCityName ?: "Selected Location",
+                            name = uiState.selectedCityName ?: "Un supported Selected Location",
                             lat  = it.latitude,
                             lon  = it.longitude
                         )

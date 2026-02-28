@@ -53,7 +53,6 @@ fun CurrentWeatherSection(
 
                 Text(
                     "${weather.main.temp.toInt()}$tSymbol",
-                   // "${weather.main.temp.toInt()}°",
                     color = Color.White,
                     fontSize = 72.sp,
                     fontWeight = FontWeight.Bold
@@ -78,7 +77,6 @@ fun CurrentWeatherSection(
 
             Text(
                 "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}$tSymbol",
-               // "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}°",
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = 14.sp
             )
@@ -93,11 +91,9 @@ fun CurrentWeatherSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 WeatherInfoItem(stringResource(R.string.High),
-                   // "${weather.main.temp_max.toInt()}°"
                     "${weather.main.temp_max.toInt()}$tSymbol"
                 )
                 WeatherInfoItem(stringResource(R.string.Low),
-                   // "${weather.main.temp_min.toInt()}°"
                     "${weather.main.temp_min.toInt()}$tSymbol"
                 )
             }

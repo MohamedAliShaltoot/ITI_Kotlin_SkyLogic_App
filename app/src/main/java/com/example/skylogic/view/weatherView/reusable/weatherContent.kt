@@ -141,7 +141,6 @@ fun WeatherContent(
 
 
                                 CurrentWeatherSection(it, windUnit, tempUnit)
-                              //  CurrentWeatherSection(it, windUnit)
                                 Spacer(Modifier.height(28.dp))
                             }
                         }
@@ -161,7 +160,6 @@ fun WeatherContent(
                             ) {
                                 items(hourly) { item ->
                                     ExpandableHourlyCard(item, windUnit, tempUnit)
-                                   // ExpandableHourlyCard(item)
                                 }
                             }
                             Spacer(Modifier.height(28.dp))
