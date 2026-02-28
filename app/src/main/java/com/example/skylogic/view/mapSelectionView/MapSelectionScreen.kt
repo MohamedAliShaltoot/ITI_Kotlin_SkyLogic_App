@@ -149,7 +149,7 @@ fun MapSelectionScreen(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 16.dp,end=56.dp),
+                    .padding(start = 16.dp, top = 6.dp),
                 containerColor = Color.White,
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp)
