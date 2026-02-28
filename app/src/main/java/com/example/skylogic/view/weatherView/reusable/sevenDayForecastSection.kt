@@ -16,7 +16,9 @@ import com.example.skylogic.models.ForecastItem
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SevenDayForecastSection(
-    daily: Map<String, List<ForecastItem>>
+    daily: Map<String, List<ForecastItem>>,
+    tempUnit: String = "Celsius",
+    windUnit: String = "meter/sec"
 ) {
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -31,7 +33,7 @@ fun SevenDayForecastSection(
         daily.entries.take(5).forEach { entry ->
 
             val dayItems = entry.value
-            ExpandableDailyCard(entry.key, dayItems)
+            ExpandableDailyCard(entry.key, dayItems, tempUnit  = tempUnit, windUnit  = windUnit  )
         }
     }
 }

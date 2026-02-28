@@ -29,16 +29,20 @@ import com.example.skylogic.R
 import coil.compose.AsyncImage
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.utils.GlassCard
+import com.example.skylogic.utils.UnitSymbol
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpandableDailyCard(
     date: String,
-    dayItems: List<ForecastItem>
+    dayItems: List<ForecastItem>,
+    windUnit: String = "meter/sec",
+    tempUnit: String = "Celsius"
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-
+    val tSymbol = UnitSymbol.temp(tempUnit)
+    val wSymbol = UnitSymbol.wind(windUnit)
     val maxTemp = dayItems.maxOf { it.main.temp }
     val minTemp = dayItems.minOf { it.main.temp }
     val avgHumidity = dayItems.map { it.main.humidity }.average()
@@ -74,7 +78,8 @@ fun ExpandableDailyCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "${stringResource(R.string.H)} ${maxTemp.toInt()}°  ${stringResource(R.string.L)} ${minTemp.toInt()}°",
+                       // "${stringResource(R.string.H)} ${maxTemp.toInt()}°  ${stringResource(R.string.L)} ${minTemp.toInt()}°",
+                        "${stringResource(R.string.H)} ${maxTemp.toInt()}$tSymbol  ${stringResource(R.string.L)} ${minTemp.toInt()}$tSymbol",
                         color = Color.White
                     )
                     Text(
@@ -92,11 +97,14 @@ fun ExpandableDailyCard(
                 Spacer(Modifier.height(12.dp))
 
                 WeatherInfoItem(stringResource(R.string.AvgHumidity), "${avgHumidity.toInt()}%")
-                WeatherInfoItem(stringResource(R.string.AvgWind), "${avgWind.toInt()} ${
-                    stringResource(
-                        R.string.MeterPerSecond
-                    )
-                }")
+                WeatherInfoItem(stringResource(R.string.AvgWind),
+                    "${avgWind.toInt()} $wSymbol"
+//                    "${avgWind.toInt()} ${
+//                    stringResource(
+//                        R.string.MeterPerSecond
+//                    )
+//                }"
+                )
                 WeatherInfoItem(stringResource(R.string.PressureRange),
                     "${dayItems.minOf { it.main.pressure }} - ${dayItems.maxOf { it.main.pressure }} ${
                         stringResource(

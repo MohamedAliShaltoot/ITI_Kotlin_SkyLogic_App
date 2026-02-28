@@ -37,6 +37,7 @@ import com.example.skylogic.view.favouriteView.FavListUiState
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.utils.NetworkState
 import com.example.skylogic.utils.OfflineBanner
+import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import kotlinx.coroutines.delay
 
 
@@ -44,7 +45,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun FavouriteView(
     navController: NavController,
-    viewModel: FavoriteViewModel = viewModel()
+    viewModel: FavoriteViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
 
     val networkState by viewModel.networkState.collectAsState()
@@ -52,7 +54,7 @@ fun FavouriteView(
     val weatherMap by viewModel.weatherMap.collectAsState()
     val context = LocalContext.current
     var previousState by remember { mutableStateOf<NetworkState?>(null) }
-
+    val tempUnit by settingsViewModel.tempUnit.collectAsState()
     LaunchedEffect(networkState) {
         if (previousState == NetworkState.Available && networkState == NetworkState.Unavailable) {
             Toast.makeText(context, "You're offline. Showing cached data.", Toast.LENGTH_SHORT).show()
@@ -215,6 +217,7 @@ fun FavouriteView(
                                     FavoriteItem(
                                         favorite = favorite,
                                         weather = weatherMap[key],
+                                        tempUnit = tempUnit,
                                         onDelete = {
                                             viewModel.deleteFavorite(favorite)
                                             Toast.makeText(context, "${favorite.name} removed from favorites", Toast.LENGTH_SHORT).show()

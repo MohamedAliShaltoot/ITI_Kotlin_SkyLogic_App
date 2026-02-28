@@ -239,6 +239,8 @@ fun WeatherScreen(
                     lon = lon,
                     name = name,
                     onBack = { navController.popBackStack() },
+                    settingsViewModel = settingsViewModel
+
                 )
             }
 
@@ -246,7 +248,8 @@ fun WeatherScreen(
             composable(Screen.Favourite.route) {
                 FavouriteView(
                     navController = navController,
-                    viewModel = favoriteViewModel
+                    viewModel = favoriteViewModel,
+                    settingsViewModel = settingsViewModel
                 )
             }
 

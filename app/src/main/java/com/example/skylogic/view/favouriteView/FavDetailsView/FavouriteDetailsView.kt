@@ -37,6 +37,8 @@ import com.example.skylogic.view.favouriteView.FavDetailsUiState
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
 import com.example.skylogic.utils.NetworkState
 import com.example.skylogic.utils.OfflineBanner
+import com.example.skylogic.utils.UnitConverter
+import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModel
 import com.example.skylogic.view.weatherView.reusable.formatDay
 import java.time.LocalDate
 
@@ -49,10 +51,15 @@ fun FavoriteDetailsScreen(
     lon: Double,
     name: String,
     onBack: () -> Unit = {},
-    viewModel: FavoriteViewModel = viewModel()
+    viewModel: FavoriteViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val networkState    by viewModel.networkState.collectAsState()
     val favDetailsState by viewModel.favDetailsState.collectAsState()
+
+    // Observe units from DataStore
+    val tempUnit by settingsViewModel.tempUnit.collectAsState()
+    val windUnit by settingsViewModel.windUnit.collectAsState()
 
     LaunchedEffect(lat, lon) {
         viewModel.loadDetailsFor(lat, lon)
@@ -189,6 +196,12 @@ fun FavoriteDetailsScreen(
                         val weather  = state.weather
                         val forecast = state.forecast
                         val today    = LocalDate.now().toString()
+                        val displayTemp      = UnitConverter.convertTemp(weather.temp,      tempUnit)
+                        val displayFeelsLike = UnitConverter.convertTemp(weather.feelsLike, tempUnit)
+                        val displayWind      = UnitConverter.convertWind(weather.windSpeed,  windUnit)
+                        val tSymbol          = UnitConverter.tempSymbol(tempUnit)
+                        val wSymbol          = UnitConverter.windSymbol(windUnit)
+
 
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -225,7 +238,7 @@ fun FavoriteDetailsScreen(
                                             modifier = Modifier.size(130.dp)
                                         )
                                         Text(
-                                            text = "${weather.temp}°C",
+                                            text = "${displayTemp.toInt()}$tSymbol",
                                             color = FavoriteDetailsViewColors.TempGold,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 64.sp,
@@ -240,13 +253,21 @@ fun FavoriteDetailsScreen(
                                         )
                                         Spacer(Modifier.height(24.dp))
                                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                            StatChip(label = stringResource(R.string.FeelsLike), value = "${weather.feelsLike}°C", modifier = Modifier.weight(1f))
-                                            StatChip(label = stringResource(R.string.Humidity), value = "${weather.humidity}${stringResource(R.string.percentage)}", modifier = Modifier.weight(1f))
+                                            StatChip(label = stringResource(R.string.FeelsLike),
+                                                value = "${displayFeelsLike.toInt()}$tSymbol",
+                                                modifier = Modifier.weight(1f))
+                                            StatChip(label = stringResource(R.string.Humidity),
+                                                value = "${weather.humidity}${stringResource(R.string.percentage)}",
+                                                modifier = Modifier.weight(1f))
                                         }
                                         Spacer(Modifier.height(10.dp))
                                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                            StatChip(label = stringResource(R.string.Wind), value = "${weather.windSpeed} ${stringResource(R.string.MeterPerSecond)}", modifier = Modifier.weight(1f))
-                                            StatChip(label = stringResource(R.string.Pressure), value = "${weather.pressure} ${stringResource(R.string.hPa)}", modifier = Modifier.weight(1f))
+                                            StatChip(label = stringResource(R.string.Wind),
+                                                value = "%.1f $wSymbol".format(displayWind),
+                                                modifier = Modifier.weight(1f))
+                                            StatChip(label = stringResource(R.string.Pressure),
+                                                value = "${weather.pressure} ${stringResource(R.string.hPa)}",
+                                                modifier = Modifier.weight(1f))
                                         }
                                     }
                                 }
@@ -257,7 +278,9 @@ fun FavoriteDetailsScreen(
                             val todayList = forecast.filter { it.dt_txt.startsWith(today) }
                             if (todayList.isNotEmpty()) {
                                 item { SectionHeader(title = stringResource(R.string.Today)) }
-                                items(todayList) { ForecastCard(it) }
+                                items(todayList) { //ForecastCard(it)
+                                    ForecastCard(it, tempUnit)
+                                }
                                 item { Spacer(Modifier.height(8.dp)) }
                             }
 
@@ -266,7 +289,9 @@ fun FavoriteDetailsScreen(
                                 .filterKeys { it != today }
                                 .forEach { (date, list) ->
                                     item { SectionHeader(title = formatDay(date)) }
-                                    items(list) { ForecastCard(it) }
+                                    items(list) {// ForecastCard(it)
+                                        ForecastCard(it, tempUnit)
+                                    }
                                     item { Spacer(Modifier.height(8.dp)) }
                                 }
                         }

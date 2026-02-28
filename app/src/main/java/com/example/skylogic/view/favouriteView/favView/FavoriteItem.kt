@@ -40,17 +40,21 @@ import coil.compose.AsyncImage
 import com.example.skylogic.R
 import com.example.skylogic.data.local.weather.CachedWeatherEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
+import com.example.skylogic.utils.UnitConverter
+import com.example.skylogic.utils.UnitSymbol
 
 @Composable
 fun FavoriteItem(
     favorite: FavoriteEntity,
     weather: CachedWeatherEntity?,
+    tempUnit: String = "Celsius",
     onDelete:  () -> Unit,
     onClick: () -> Unit,
     onAppear: () -> Unit
 ) {
     LaunchedEffect(favorite.lat, favorite.lon) { onAppear() }
-
+    val tSymbol     = UnitSymbol.temp(tempUnit)
+    val displayTemp = weather?.let { UnitConverter.convertTemp(it.temp, tempUnit) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +136,7 @@ fun FavoriteItem(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                text = "${weather.temp}°C",
+                                text = "${displayTemp?.toInt()}$tSymbol",
                                 color = FavouriteViewColors.TempGold,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,

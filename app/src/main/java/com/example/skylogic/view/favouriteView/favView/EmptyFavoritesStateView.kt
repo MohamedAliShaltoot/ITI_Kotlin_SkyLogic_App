@@ -62,7 +62,6 @@ import com.example.skylogic.R
                 fontSize = 22.sp
             )
             Text(
-                //text = "Tap + to save your favorite\nweather locations",
                 text = stringResource(R.string.Taptosaveyourfavorite),
                 color = FavouriteViewColors.Companion.TextSecondary,
                 fontSize = 15.sp,
