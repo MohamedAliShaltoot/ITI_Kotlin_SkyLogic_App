@@ -138,6 +138,11 @@ fun SettingsScreen(
                     ),
                     selected = locationMode,
                     onSelect = { selected ->
+
+                        if (isOffline) {
+                            showOfflineError = true
+                            return@RadioGroup
+                        }
                         viewModel.setLocationMode(selected)
 
                         if (selected == "Map") {

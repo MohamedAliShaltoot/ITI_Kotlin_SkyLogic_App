@@ -27,7 +27,6 @@ class SettingsDataStore(private val context: Context) : ISettingsDataStore{
         val LANGUAGE = stringPreferencesKey("language")
         val LAT = doublePreferencesKey("lat")
         val LON = doublePreferencesKey("lon")
-
     }
     override val lat: Flow<Double?> =
         context.dataStore.data.map { it[LAT] }

@@ -12,6 +12,8 @@ import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.remote.RetrofitInstance
 import com.example.skylogic.data.repository.AppRepository
 import com.example.skylogic.models.ForecastItem
+import com.example.skylogic.utils.ConnectivityObserver
+import com.example.skylogic.utils.NetworkState
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
