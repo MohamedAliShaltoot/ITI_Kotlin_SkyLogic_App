@@ -78,7 +78,6 @@ fun ExpandableDailyCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                       // "${stringResource(R.string.H)} ${maxTemp.toInt()}°  ${stringResource(R.string.L)} ${minTemp.toInt()}°",
                         "${stringResource(R.string.H)} ${maxTemp.toInt()}$tSymbol  ${stringResource(R.string.L)} ${minTemp.toInt()}$tSymbol",
                         color = Color.White
                     )
@@ -99,11 +98,6 @@ fun ExpandableDailyCard(
                 WeatherInfoItem(stringResource(R.string.AvgHumidity), "${avgHumidity.toInt()}%")
                 WeatherInfoItem(stringResource(R.string.AvgWind),
                     "${avgWind.toInt()} $wSymbol"
-//                    "${avgWind.toInt()} ${
-//                    stringResource(
-//                        R.string.MeterPerSecond
-//                    )
-//                }"
                 )
                 WeatherInfoItem(stringResource(R.string.PressureRange),
                     "${dayItems.minOf { it.main.pressure }} - ${dayItems.maxOf { it.main.pressure }} ${

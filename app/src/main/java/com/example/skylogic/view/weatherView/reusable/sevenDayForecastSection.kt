@@ -4,8 +4,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,7 +27,8 @@ fun SevenDayForecastSection(
 
         Text(
             stringResource(R.string.FiveDAYFORECAST),
-            color = Color.Gray,
+            modifier = Modifier.padding(start=10.dp),
+            color = Color.White.copy(alpha = 0.6f),
             fontSize = 12.sp,
             letterSpacing = 1.sp
         )
