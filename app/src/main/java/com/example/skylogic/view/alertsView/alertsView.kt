@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAlert
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -51,14 +52,15 @@ fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { showSheet = true },
-                    containerColor = AlertColors.AccentCyan,
+                    containerColor = AlertColors.AccentBlue,
                     contentColor = AlertColors.BgDeep,
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(12.dp),
                     modifier = Modifier.size(60.dp)
                 ) {
                     Icon(
-                        Icons.Default.Add,
+                        Icons.Default.AddAlert,
+                        tint = AlertColors.TextPrimary,
                         contentDescription = "Add Alert",
                         modifier = Modifier.size(26.dp)
                     )
