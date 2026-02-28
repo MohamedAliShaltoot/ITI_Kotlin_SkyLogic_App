@@ -207,7 +207,8 @@ fun WeatherScreen(
                     WeatherContent(
                         viewModel = viewModel,
                         settingsViewModel = settingsViewModel,
-                        isOffline = isOffline
+                        isOffline = isOffline,
+                        navController = navController
                     )
                 }
             }
