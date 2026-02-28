@@ -12,27 +12,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,16 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,15 +38,16 @@ import com.example.skylogic.ui.theme.SkyLogicTheme
 import com.example.skylogic.utils.LocationHelper
 import com.example.skylogic.view.alertsView.AlertScreen
 import com.example.skylogic.view.alertsView.AlertViewModel
-import com.example.skylogic.view.favouriteView.ConnectivityObserver
+import com.example.skylogic.utils.ConnectivityObserver
 import com.example.skylogic.view.favouriteView.FavDetailsView.FavoriteDetailsScreen
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
-import com.example.skylogic.view.favouriteView.NetworkState
+import com.example.skylogic.utils.NetworkState
 import com.example.skylogic.view.favouriteView.favView.FavouriteView
 import com.example.skylogic.view.settingView.SettingsDataStore
 import com.example.skylogic.view.settingView.SettingsScreen
 import com.example.skylogic.view.settingView.applyLocale
 import com.example.skylogic.view.settingView.settingViewModel.SettingsViewModelFactory
+import com.example.skylogic.view.splashView.SkyLogicSplashScreen
 import com.example.skylogic.view.weatherView.reusable.LocationPermissionDeniedView
 import com.example.skylogic.view.weatherView.weatherViewModel.WeatherViewModel
 import com.example.skylogic.view.weatherView.reusable.WeatherContent
@@ -195,7 +171,9 @@ fun WeatherScreen(
                 SkyLogicSplashScreen(
                     onSplashComplete = {
                         navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true } // removes splash from back stack
+                            popUpTo(Screen.Splash.route) {
+                                inclusive = true
+                            } // removes splash from back stack
                         }
                     }
                 )
@@ -288,73 +266,3 @@ fun WeatherScreen(
         }
     }
 }
-
-@Composable
-fun BottomNavBar(navController: NavController) {
-
-    val items = listOf(
-        Screen.Home,
-        Screen.Favourite,
-        Screen.Alerts,
-        Screen.Settings
-    )
-
-    val currentRoute =
-        navController.currentBackStackEntryAsState().value?.destination?.route
-
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.2f))
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-
-        items.forEach { screen ->
-
-            val selected = currentRoute == screen.route
-
-            BottomItem(
-                label = stringResource(screen.labelRes),
-                icon = when (screen) {
-                    Screen.Home -> Icons.Default.Home
-                    Screen.Favourite -> Icons.Default.Favorite
-                    Screen.Alerts -> Icons.Default.Notifications
-                    Screen.Settings -> Icons.Default.Settings
-                    else -> Icons.Default.Home
-                },
-                selected = selected
-            ) {
-                navController.navigate(screen.route) {
-                    popUpTo(Screen.Home.route)
-                    launchSingleTop = true
-                }
-            }
-        }
-    }
-}
-@Composable
-fun BottomItem(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-
-    val tint by animateColorAsState(
-        if (selected) Color(0xFF4DA3FF) else Color.Gray,
-        label = ""
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .clickable { onClick() }
-    ) {
-        Icon(icon, null, tint = tint)
-        Text(label.uppercase(), color = tint, fontSize = 12.sp)
-    }
-}
-
-
