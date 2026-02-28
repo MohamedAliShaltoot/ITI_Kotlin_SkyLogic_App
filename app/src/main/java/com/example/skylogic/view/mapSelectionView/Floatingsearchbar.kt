@@ -41,7 +41,7 @@ fun FloatingSearchBar(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth().height(62.dp)
             .shadow(
                 elevation = 12.dp,
                 shape = RoundedCornerShape(12.dp),
@@ -63,7 +63,7 @@ fun FloatingSearchBar(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
                 tint = Color(0xFF4DA3FF),
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(26.dp)
             )
 
             Spacer(Modifier.width(10.dp))
@@ -76,7 +76,7 @@ fun FloatingSearchBar(
                 singleLine = true,
                 textStyle = TextStyle(
                     color = Color(0xFF1A1A2E),
-                    fontSize = 15.sp
+                    fontSize = 20.sp
                 ),
                 cursorBrush = SolidColor(Color(0xFF4DA3FF)),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
