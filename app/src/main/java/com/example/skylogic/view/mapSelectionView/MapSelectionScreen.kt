@@ -73,7 +73,7 @@ fun MapSelectionScreen(
      var selectedCityName by remember { mutableStateOf<String?>(null) }
 
     var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
-    var marker by remember { mutableStateOf<Marker?>(null) }
+     var currentMarker by remember { mutableStateOf<Marker?>(null) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
      val snackbarHostState = remember { SnackbarHostState() }
      val scope = rememberCoroutineScope()
@@ -81,9 +81,10 @@ fun MapSelectionScreen(
          snackbarHost = {
              SnackbarHost(hostState = snackbarHostState) { data ->
                  Snackbar(
-                     shape = RoundedCornerShape(20.dp),
+                     shape = RoundedCornerShape(10.dp),
                      containerColor = Color(0xFF1E88E5),
-                     contentColor = Color.White
+                     contentColor = Color.White,
+                     modifier = Modifier.height(56.dp).padding(horizontal = 16.dp)
                  ) {
                      Row(verticalAlignment = Alignment.CenterVertically) {
 
@@ -132,6 +133,7 @@ fun MapSelectionScreen(
                 mv.controller.setZoom(5.0)
                 mv.controller.setCenter(GeoPoint(30.0444, 31.2357))
 
+                // when user tap on map
                 val receiver = object : MapEventsReceiver {
 
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
@@ -144,20 +146,13 @@ fun MapSelectionScreen(
                                 geoPoint.longitude
                             ) { cityName ->
                                 selectedCityName = cityName
-                                marker?.let { mv.overlays.remove(it) }
-
-                                val newMarker = Marker(mv)
-                                newMarker.position = geoPoint
-                                newMarker.setAnchor(
-                                    Marker.ANCHOR_CENTER,
-                                    Marker.ANCHOR_BOTTOM
+                                currentMarker = placeEnhancedMarker(
+                                    context     = context,
+                                    mapView     = mv,
+                                    point       = geoPoint,
+                                    title       = cityName,
+                                    currentMarker = currentMarker
                                 )
-                                newMarker.title = cityName
-                                newMarker.showInfoWindow()
-
-                                mv.overlays.add(newMarker)
-                                marker = newMarker
-                                mv.invalidate()
                             }
                         }
                         return true
@@ -171,18 +166,15 @@ fun MapSelectionScreen(
             }
         )
 
+             // search by city name
         Column(
             Modifier
                 .align(Alignment.TopCenter)
                 .padding(16.dp)
         ) {
-
-            TextField(
+            FloatingSearchBar(
                 value = searchQuery,
-                onValueChange = { mapViewModel.onSearchQueryChanged(it) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.SearchCity)) },
-                shape = RoundedCornerShape(20.dp)
+                onValueChange = { mapViewModel.onSearchQueryChanged(it) }
             )
 
             if (suggestions.isNotEmpty()) {
@@ -213,26 +205,15 @@ fun MapSelectionScreen(
 
                                         mapView?.controller?.animateTo(geoPoint)
                                         mapView?.controller?.setZoom(12.0)
-
-                                        marker?.let {
-                                            mapView?.overlays?.remove(it)
+                                        mapView?.let { mv ->
+                                            currentMarker = placeEnhancedMarker(
+                                                context       = context,
+                                                mapView       = mv,
+                                                point         = geoPoint,
+                                                title         = "${city.name}, ${city.country}",
+                                                currentMarker = currentMarker
+                                            )
                                         }
-
-                                        val newMarker = Marker(mapView)
-                                        newMarker.position = geoPoint
-                                        newMarker.setAnchor(
-                                            Marker.ANCHOR_CENTER,
-                                            Marker.ANCHOR_BOTTOM
-                                        )
-                                        selectedCityName = "${city.name}, ${city.country}"
-
-                                        newMarker.title =
-                                            "${city.name}, ${city.country}"
-                                        newMarker.showInfoWindow()
-
-                                        mapView?.overlays?.add(newMarker)
-                                        marker = newMarker
-                                        mapView?.invalidate()
                                     }
                                     .padding(14.dp)
                             )
@@ -247,8 +228,6 @@ fun MapSelectionScreen(
             shape = CircleShape,
             onClick = {
                 selectedPoint?.let {
-
-                   // val cityName = searchQuery.ifBlank { "Custom Location" }
                     val cityName = selectedCityName ?: "Selected Location"
 
                     favoriteViewModel.addFavorite(
