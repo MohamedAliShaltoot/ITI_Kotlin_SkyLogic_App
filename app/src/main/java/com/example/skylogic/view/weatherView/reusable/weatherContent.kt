@@ -59,7 +59,7 @@ fun WeatherContent(
 ) {
     val uiState  by viewModel.uiState.collectAsState()
     val windUnit by settingsViewModel.windUnit.collectAsState()
-
+    val tempUnit by settingsViewModel.tempUnit.collectAsState()
     val weather = when (val s = uiState) {
         is WeatherUiState.Success       -> s.weather
         is WeatherUiState.CachedSuccess -> s.weather
@@ -138,7 +138,10 @@ fun WeatherContent(
                                 Spacer(Modifier.height(24.dp))
                             }
                             item {
-                                CurrentWeatherSection(it, windUnit)
+
+
+                                CurrentWeatherSection(it, windUnit, tempUnit)
+                              //  CurrentWeatherSection(it, windUnit)
                                 Spacer(Modifier.height(28.dp))
                             }
                         }
@@ -156,13 +159,17 @@ fun WeatherContent(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                items(hourly) { item -> ExpandableHourlyCard(item) }
+                                items(hourly) { item ->
+                                    ExpandableHourlyCard(item, windUnit, tempUnit)
+                                   // ExpandableHourlyCard(item)
+                                }
                             }
                             Spacer(Modifier.height(28.dp))
                         }
 
                         item {
-                            SevenDayForecastSection(daily)
+                            SevenDayForecastSection(daily,tempUnit = tempUnit,
+                                windUnit = windUnit)
                             Spacer(Modifier.height(24.dp))
                         }
                     }

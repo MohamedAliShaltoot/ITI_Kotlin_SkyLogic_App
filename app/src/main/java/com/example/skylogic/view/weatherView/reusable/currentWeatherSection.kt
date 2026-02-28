@@ -23,14 +23,17 @@ import coil.compose.AsyncImage
 import com.example.skylogic.R
 import com.example.skylogic.models.CurrentWeatherResponse
 import com.example.skylogic.utils.GlassCard
+import com.example.skylogic.utils.UnitSymbol
 
 @Composable
 fun CurrentWeatherSection(
     weather: CurrentWeatherResponse,
     windUnit: String,
+    tempUnit: String,
 ) {
 
     val windSpeed = convertWindSpeed(weather.wind.speed, windUnit)
+    val tSymbol   = UnitSymbol.temp(tempUnit)
 
     GlassCard(
         modifier = Modifier
@@ -49,7 +52,8 @@ fun CurrentWeatherSection(
             ) {
 
                 Text(
-                    "${weather.main.temp.toInt()}°",
+                    "${weather.main.temp.toInt()}$tSymbol",
+                   // "${weather.main.temp.toInt()}°",
                     color = Color.White,
                     fontSize = 72.sp,
                     fontWeight = FontWeight.Bold
@@ -73,7 +77,8 @@ fun CurrentWeatherSection(
             )
 
             Text(
-                "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}°",
+                "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}$tSymbol",
+               // "${stringResource(R.string.FeelsLike)} ${weather.main.feels_like.toInt()}°",
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = 14.sp
             )
@@ -87,8 +92,14 @@ fun CurrentWeatherSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                WeatherInfoItem(stringResource(R.string.High), "${weather.main.temp_max.toInt()}°")
-                WeatherInfoItem(stringResource(R.string.Low), "${weather.main.temp_min.toInt()}°")
+                WeatherInfoItem(stringResource(R.string.High),
+                   // "${weather.main.temp_max.toInt()}°"
+                    "${weather.main.temp_max.toInt()}$tSymbol"
+                )
+                WeatherInfoItem(stringResource(R.string.Low),
+                   // "${weather.main.temp_min.toInt()}°"
+                    "${weather.main.temp_min.toInt()}$tSymbol"
+                )
             }
 
             Spacer(Modifier.height(12.dp))

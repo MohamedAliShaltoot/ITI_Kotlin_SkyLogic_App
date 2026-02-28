@@ -24,12 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.skylogic.models.ForecastItem
+import com.example.skylogic.utils.UnitConverter
+import com.example.skylogic.utils.UnitSymbol
 import com.example.skylogic.view.weatherView.reusable.formatUnixTime
 
 @Composable
-fun ForecastCard(item: ForecastItem) {
+fun ForecastCard(item: ForecastItem , tempUnit: String = "Celsius") {
     val formattedTime = formatUnixTime(item.dt)
-
+    val tSymbol = UnitSymbol.temp(tempUnit)
+    val displayTemp = UnitConverter.convertTemp(item.main.temp, tempUnit)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,7 +92,7 @@ fun ForecastCard(item: ForecastItem) {
                     modifier = Modifier.size(46.dp)
                 )
                 Text(
-                    text = "${item.main.temp}°C",
+                    text = "${displayTemp.toInt()}$tSymbol",
                     color = FavoriteDetailsViewColors. TempGold,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,

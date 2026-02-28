@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -114,22 +115,6 @@ fun WeatherScreen(
         initial = NetworkState.Available
     )
     val isOffline = networkState is NetworkState.Unavailable
-    val permissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-
-            if (isGranted) {
-                locationHelper.getCurrentLocation { location ->
-                    location?.let {
-                        viewModel.fetchWeather(it.latitude, it.longitude)
-                    }
-                }
-            } else {
-                permissionDenied = true
-            }
-        }
-
     val savedLat = settingsViewModel.lat.collectAsState().value
     val savedLon = settingsViewModel.lon.collectAsState().value
     val locationMode = settingsViewModel.locationMode.collectAsState().value
@@ -142,6 +127,31 @@ fun WeatherScreen(
         "Fahrenheit" -> "imperial"
         else         -> "standard"
     }
+
+    val currentApiUnit by rememberUpdatedState(apiUnit)
+    val currentApiLang by rememberUpdatedState(apiLang)
+
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                locationHelper.getCurrentLocation { location ->
+                    if (location != null) {
+                        viewModel.fetchWeather(
+                            location.latitude,
+                            location.longitude,
+                            currentApiUnit,   // ✓ always up to date
+                            currentApiLang
+                        )
+                    } else {
+                        viewModel.setError("Could not get location. Please try again or use Map mode.")
+                    }
+                }
+            } else {
+                permissionDenied = true
+            }
+        }
 
     LaunchedEffect(savedLat, savedLon, locationMode, apiLang, apiUnit) {
         if (locationMode == "Map" && savedLat != null && savedLon != null) {
@@ -239,6 +249,8 @@ fun WeatherScreen(
                     lon = lon,
                     name = name,
                     onBack = { navController.popBackStack() },
+                    settingsViewModel = settingsViewModel
+
                 )
             }
 
@@ -246,7 +258,8 @@ fun WeatherScreen(
             composable(Screen.Favourite.route) {
                 FavouriteView(
                     navController = navController,
-                    viewModel = favoriteViewModel
+                    viewModel = favoriteViewModel,
+                    settingsViewModel = settingsViewModel
                 )
             }
 

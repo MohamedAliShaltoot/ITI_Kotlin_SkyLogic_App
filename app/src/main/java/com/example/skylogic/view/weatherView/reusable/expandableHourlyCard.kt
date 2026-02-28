@@ -26,12 +26,18 @@ import coil.compose.AsyncImage
 import com.example.skylogic.R
 import com.example.skylogic.models.ForecastItem
 import com.example.skylogic.utils.GlassCard
+import com.example.skylogic.utils.UnitSymbol
 
 
 @Composable
-fun ExpandableHourlyCard(item: ForecastItem) {
+fun ExpandableHourlyCard(item: ForecastItem,
+                         windUnit: String = "meter/sec",   // ← add
+                         tempUnit: String = "Celsius"       // ← add
+                           ) {
 
     var expanded by remember { mutableStateOf(false) }
+    val tSymbol = UnitSymbol.temp(tempUnit)
+    val wSymbol = UnitSymbol.wind(windUnit)
 
     GlassCard(
         modifier = Modifier
@@ -60,14 +66,16 @@ fun ExpandableHourlyCard(item: ForecastItem) {
             )
 
             Text(
-                "${item.main.temp.toInt()}°",
+                "${item.main.temp.toInt()}$tSymbol",
+               // "${item.main.temp.toInt()}°",
                 color = Color.White,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                "${stringResource(R.string.FeelsLike)} ${item.main.feels_like.toInt()}°",
+                //"${stringResource(R.string.FeelsLike)} ${item.main.feels_like.toInt()}°",
+                "${stringResource(R.string.FeelsLike)} ${item.main.feels_like.toInt()}$tSymbol",
                 color = Color.LightGray,
                 fontSize = 12.sp
             )
@@ -98,14 +106,21 @@ fun ExpandableHourlyCard(item: ForecastItem) {
                     )
                 }")
                 WeatherInfoItem(stringResource(R.string.Visibility), "${item.visibility / 1000} ${stringResource(R.string.km)}")
-                WeatherInfoItem(stringResource(R.string.WindSpeed), "${item.wind.speed} ${
-                    stringResource(
-                        R.string.MeterPerSecond
-                    )
-                }")
+                WeatherInfoItem(stringResource(R.string.WindSpeed),
+//                    "${item.wind.speed} ${
+//                    stringResource(
+//                        R.string.MeterPerSecond
+//                    )
+//                }"
+                    "${item.wind.speed} $wSymbol"
+
+                )
                 WeatherInfoItem(stringResource(R.string.WindDirection), "${item.wind.deg}°")
                 item.wind.gust?.let {
-                    WeatherInfoItem(stringResource(R.string.WindGust), "$it ${stringResource(R.string.MeterPerSecond)}")
+                    WeatherInfoItem(stringResource(R.string.WindGust),
+                       // "$it ${stringResource(R.string.MeterPerSecond)}"
+                        "$it $wSymbol"
+                    )
                 }
             }
         }
