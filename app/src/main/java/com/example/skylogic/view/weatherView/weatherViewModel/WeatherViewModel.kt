@@ -67,7 +67,9 @@ class WeatherViewModel(application: Application ,  private val appRepository: IA
         }
         return forecast.groupBy { it.dt_txt.substringBefore(" ") }
     }
-
+    fun setError(message: String) {
+        _uiState.value = WeatherUiState.Error(message)
+    }
     fun fetchWeather(
         lat: Double,
         lon: Double,
