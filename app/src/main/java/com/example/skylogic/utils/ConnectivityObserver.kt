@@ -1,10 +1,10 @@
-package com.example.skylogic.view.favouriteView
+package com.example.skylogic.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.net.NetworkRequest
+import com.example.skylogic.utils.NetworkState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -35,7 +35,7 @@ class ConnectivityObserver(context: Context) {
             )
         }
 
-        // 👇 check immediately
+        // check immediately
         checkCurrentState()
 
         val callback = object : ConnectivityManager.NetworkCallback() {

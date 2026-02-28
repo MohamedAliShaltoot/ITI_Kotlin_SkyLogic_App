@@ -35,8 +35,8 @@ import androidx.navigation.NavController
 import com.example.skylogic.models.Screen
 import com.example.skylogic.view.favouriteView.FavListUiState
 import com.example.skylogic.view.favouriteView.FavoriteViewModel
-import com.example.skylogic.view.favouriteView.NetworkState
-import com.example.skylogic.view.favouriteView.OfflineBanner
+import com.example.skylogic.utils.NetworkState
+import com.example.skylogic.utils.OfflineBanner
 import kotlinx.coroutines.delay
 
 

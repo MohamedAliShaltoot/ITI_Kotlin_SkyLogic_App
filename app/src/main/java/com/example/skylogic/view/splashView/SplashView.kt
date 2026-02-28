@@ -1,4 +1,4 @@
-package com.example.skylogic
+package com.example.skylogic.view.splashView
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.*

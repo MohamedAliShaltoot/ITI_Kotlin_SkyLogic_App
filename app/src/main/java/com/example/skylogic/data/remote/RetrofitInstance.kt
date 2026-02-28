@@ -3,17 +3,13 @@ package com.example.skylogic.data.remote
 import com.example.skylogic.AppConstants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.osmdroid.library.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
-
-    private val logging = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
-    private val okHttpClient = OkHttpClient.Builder()
+  private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val original = chain.request()
 
@@ -29,7 +25,14 @@ object RetrofitInstance {
 
             chain.proceed(newRequest)
         }
-        .addInterceptor(logging)
+//        .apply {
+//            if (BuildConfig.DEBUG) {
+//                val logging = HttpLoggingInterceptor().apply {
+//                    level = HttpLoggingInterceptor.Level.BODY
+//                }
+//                addInterceptor(logging)
+//            }
+//        }
         .build()
 
     val api: WeatherService by lazy {

@@ -15,15 +15,8 @@ class SettingsViewModel(application: Application,
                         private val dataStore: ISettingsDataStore = SettingsDataStore(application)) :
     AndroidViewModel(application) {
 
-   // private val dataStore = SettingsDataStore(application)
     val lat = dataStore.lat.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
     val lon = dataStore.lon.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
-
-    fun setCustomLocation(lat: Double, lon: Double) {
-        viewModelScope.launch {
-            dataStore.saveCustomLocation(lat, lon)
-        }
-    }
 
     val locationMode = dataStore.locationMode
         .stateIn(viewModelScope, SharingStarted.Companion.Lazily, "GPS")
@@ -42,7 +35,11 @@ class SettingsViewModel(application: Application,
             dataStore.saveLocationMode(value)
         }
     }
-
+    fun setCustomLocation(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            dataStore.saveCustomLocation(lat, lon)
+        }
+    }
     fun setTempUnit(value: String) {
         viewModelScope.launch {
             dataStore.saveTempUnit(value)

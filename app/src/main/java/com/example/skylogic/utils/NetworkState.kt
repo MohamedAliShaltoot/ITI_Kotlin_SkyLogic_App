@@ -1,4 +1,4 @@
-package com.example.skylogic.view.favouriteView
+package com.example.skylogic.utils
 
 sealed class NetworkState {
     object Available : NetworkState()
