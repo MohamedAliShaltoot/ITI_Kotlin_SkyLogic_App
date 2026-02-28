@@ -68,9 +68,11 @@ fun MapSelectionScreen(
 
     var currentMarker by remember { mutableStateOf<Marker?>(null) }
     var mapView       by remember { mutableStateOf<MapView?>(null) }
+
+    val currentMarkerRef = rememberUpdatedState(currentMarker)
+
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Snackbar side-effect
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let { msg ->
             snackbarHostState.showSnackbar(message = msg, duration = SnackbarDuration.Short)
@@ -78,7 +80,6 @@ fun MapSelectionScreen(
         }
     }
 
-    // Marker side effect — reacts to reverseGeocodeState.Success
     LaunchedEffect(uiState.reverseGeocodeState) {
         val state = uiState.reverseGeocodeState
         if (state is ReverseGeocodeState.Success) {
@@ -89,7 +90,7 @@ fun MapSelectionScreen(
                     mapView       = mv,
                     point         = point,
                     title         = state.cityName,
-                    currentMarker = currentMarker
+                    currentMarker = currentMarkerRef.value   // ← always latest
                 )
             }
         }
@@ -148,8 +149,6 @@ fun MapSelectionScreen(
                 }
             )
 
-            // Suggestion map-animate side effect
-            // Animate map when a suggestion is selected
             LaunchedEffect(uiState.selectedPoint) {
                 if (uiState.searchState is SearchState.Idle && uiState.selectedPoint != null) {
                     mapView?.controller?.animateTo(uiState.selectedPoint)
@@ -160,7 +159,7 @@ fun MapSelectionScreen(
                             mapView       = mv,
                             point         = uiState.selectedPoint!!,
                             title         = uiState.selectedCityName ?: "",
-                            currentMarker = currentMarker
+                            currentMarker = currentMarkerRef.value
                         )
                     }
                 }
