@@ -30,7 +30,9 @@ fun WeatherFetchEffect(
                     settings.apiLang
                 )
             }
-            settings.locationMode == "GPS" -> {
+            settings.locationMode == "GPS"
+                && settings.savedLat == null  // ← only launch GPS if no saved coords
+                && settings.savedLon == null-> {
                 permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }

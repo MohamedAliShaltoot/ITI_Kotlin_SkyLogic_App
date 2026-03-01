@@ -15,8 +15,11 @@ import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.repository.AppRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -28,7 +31,19 @@ class AlertViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<AlertUiState>(AlertUiState.Loading)
     val uiState: StateFlow<AlertUiState> = _uiState
+    private val _alertEvent = MutableSharedFlow<AlertEvent>()
+    val alertEvent: SharedFlow<AlertEvent> = _alertEvent.asSharedFlow()
 
+    // Called when user clicks the FAB — checks permission before opening sheet
+    fun onAddAlertClicked(hasPermission: Boolean) {
+        viewModelScope.launch {
+            if (hasPermission) {
+                _alertEvent.emit(AlertEvent.PermissionAlreadyGranted)
+            } else {
+                _alertEvent.emit(AlertEvent.RequestNotificationPermission)
+            }
+        }
+    }
     init {
         viewModelScope.launch {
             appRepository.getAllAlerts().collect { list ->
@@ -79,7 +94,6 @@ class AlertViewModel(application: Application) : AndroidViewModel(application) {
                     )
 
                 // PeriodicWorkRequest: keeps checking every 15 min during active window
-                // Only schedule if the window is long enough to benefit from periodic checks
                 val windowDuration = end - start
                 if (windowDuration > 15 * 60 * 1000L) {
                     val periodicRequest = PeriodicWorkRequestBuilder<WeatherAlertWorker>(

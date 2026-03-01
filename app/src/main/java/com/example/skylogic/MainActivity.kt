@@ -31,9 +31,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SkyLogicTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    WeatherScreen(startDestination = destination)
-                }
+                WeatherScreen(startDestination = destination)
             }
         }
     }

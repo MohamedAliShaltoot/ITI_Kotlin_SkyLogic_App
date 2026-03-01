@@ -9,3 +9,7 @@ sealed class AlertUiState {
     data class Success(val alerts: List<AlertEntity>) : AlertUiState()
     data class Error(val message: String) : AlertUiState()
 }
+sealed class AlertEvent {
+    object RequestNotificationPermission : AlertEvent()
+    object PermissionAlreadyGranted : AlertEvent()
+}

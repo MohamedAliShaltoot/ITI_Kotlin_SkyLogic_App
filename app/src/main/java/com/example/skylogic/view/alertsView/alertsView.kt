@@ -1,6 +1,11 @@
 package com.example.skylogic.view.alertsView
 
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -20,8 +25,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.skylogic.view.alertsView.reusable.AddAlertBottomSheet
 import com.example.skylogic.view.alertsView.reusable.AlertCard
@@ -32,14 +39,60 @@ import com.example.skylogic.view.alertsView.reusable.EmptyState
 import java.text.SimpleDateFormat
 import java.util.*
 
-// AlertScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @androidx.annotation.RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
 @Composable
 fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val alertEvent by viewModel.alertEvent.collectAsState(initial = null)
     var showSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val hasNotificationPermission = remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else true
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasNotificationPermission.value = isGranted
+        if (isGranted) {
+            showSheet = true
+        }
+    }
+
+    // Collect one-time events from ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.alertEvent.collect { event ->
+            when (event) {
+                is AlertEvent.PermissionAlreadyGranted -> {
+                    showSheet = true
+                }
+                is AlertEvent.RequestNotificationPermission -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val result = snackbarHostState.showSnackbar(
+                            message = "Notification permission is required to receive weather alerts.",
+                            actionLabel = "Grant",
+                            duration = SnackbarDuration.Long
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    } else {
+                        showSheet = true
+                    }
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -48,10 +101,13 @@ fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
     ) {
         Scaffold(
             containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = { AlertTopBar() },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { showSheet = true },
+                    onClick = {
+                        viewModel.onAddAlertClicked(hasNotificationPermission.value)
+                    },
                     containerColor = AlertColors.AccentBlue,
                     contentColor = AlertColors.BgDeep,
                     shape = CircleShape,
@@ -72,7 +128,9 @@ fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
 
                 is AlertUiState.Loading -> {
                     Box(
-                        modifier = Modifier.fillMaxSize().padding(padding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
@@ -88,7 +146,9 @@ fun AlertScreen(viewModel: AlertViewModel = viewModel()) {
 
                 is AlertUiState.Error -> {
                     Box(
-                        modifier = Modifier.fillMaxSize().padding(padding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
