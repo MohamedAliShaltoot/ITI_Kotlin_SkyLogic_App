@@ -6,6 +6,8 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -13,8 +15,11 @@ import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.LocalDataSource
 import com.example.skylogic.data.remote.RemoteDataSource
 import com.example.skylogic.data.repository.AppRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -26,7 +31,19 @@ class AlertViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<AlertUiState>(AlertUiState.Loading)
     val uiState: StateFlow<AlertUiState> = _uiState
+    private val _alertEvent = MutableSharedFlow<AlertEvent>()
+    val alertEvent: SharedFlow<AlertEvent> = _alertEvent.asSharedFlow()
 
+    // Called when user clicks the FAB — checks permission before opening sheet
+    fun onAddAlertClicked(hasPermission: Boolean) {
+        viewModelScope.launch {
+            if (hasPermission) {
+                _alertEvent.emit(AlertEvent.PermissionAlreadyGranted)
+            } else {
+                _alertEvent.emit(AlertEvent.RequestNotificationPermission)
+            }
+        }
+    }
     init {
         viewModelScope.launch {
             appRepository.getAllAlerts().collect { list ->
@@ -58,16 +75,41 @@ class AlertViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 )
                 val alertId = id.toInt()
-                val workRequest = PeriodicWorkRequestBuilder<WeatherAlertWorker>(15, TimeUnit.MINUTES)
-                    .setInputData(workDataOf("ALERT_ID" to alertId))
+                val inputData = workDataOf("ALERT_ID" to alertId)
+                val now = System.currentTimeMillis()
+
+                //OneTimeWorkRequest: fires exactly at startTime
+                val initialDelay = (start - now).coerceAtLeast(0L)
+
+                val oneTimeRequest = OneTimeWorkRequestBuilder<WeatherAlertWorker>()
+                    .setInputData(inputData)
+                    .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
                     .build()
 
                 WorkManager.getInstance(getApplication())
-                    .enqueueUniquePeriodicWork(
-                        "weather_alert_$alertId",
-                        ExistingPeriodicWorkPolicy.REPLACE,
-                        workRequest
+                    .enqueueUniqueWork(
+                        "weather_alert_once_$alertId",
+                        ExistingWorkPolicy.REPLACE,
+                        oneTimeRequest
                     )
+
+                // PeriodicWorkRequest: keeps checking every 15 min during active window
+                val windowDuration = end - start
+                if (windowDuration > 15 * 60 * 1000L) {
+                    val periodicRequest = PeriodicWorkRequestBuilder<WeatherAlertWorker>(
+                        15, TimeUnit.MINUTES
+                    )
+                        .setInputData(inputData)
+                        .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+                        .build()
+
+                    WorkManager.getInstance(getApplication())
+                        .enqueueUniquePeriodicWork(
+                            "weather_alert_periodic_$alertId",
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            periodicRequest
+                        )
+                }
             } catch (e: Exception) {
                 _uiState.value = AlertUiState.Error(e.message ?: "Failed to add alert")
             }
@@ -78,8 +120,11 @@ class AlertViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 appRepository.deleteAlert(alert)
-                WorkManager.getInstance(getApplication())
-                    .cancelUniqueWork("weather_alert_${alert.id}")
+                val wm = WorkManager.getInstance(getApplication())
+
+                // Cancel both workers
+                wm.cancelUniqueWork("weather_alert_once_${alert.id}")
+                wm.cancelUniqueWork("weather_alert_periodic_${alert.id}")
             } catch (e: Exception) {
                 _uiState.value = AlertUiState.Error(e.message ?: "Failed to delete alert")
             }

@@ -41,14 +41,11 @@ class WeatherAlertWorker(
 
         val now = System.currentTimeMillis()
 
-        // respecting start time
-        if (now < alert.startTime) {
-            return Result.success()
-        }
-        // Check duration validity
         if (now > alert.endTime) {
             WorkManager.getInstance(applicationContext)
-                .cancelUniqueWork("weather_alert_$alertId")
+                .cancelUniqueWork("weather_alert_once_$alertId")
+            WorkManager.getInstance(applicationContext)
+                .cancelUniqueWork("weather_alert_periodic_$alertId")
             return Result.success()
         }
 

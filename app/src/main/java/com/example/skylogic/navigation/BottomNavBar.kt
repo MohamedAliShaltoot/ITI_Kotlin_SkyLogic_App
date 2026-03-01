@@ -1,4 +1,4 @@
-package com.example.skylogic
+package com.example.skylogic.navigation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background

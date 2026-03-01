@@ -15,7 +15,10 @@ class SettingsViewModel(application: Application,
                         private val dataStore: ISettingsDataStore = SettingsDataStore(application)) :
     AndroidViewModel(application) {
 
-    val lat = dataStore.lat.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
+    val lat = dataStore.lat.stateIn(viewModelScope,
+      //  SharingStarted.Companion.Lazily,
+        SharingStarted.WhileSubscribed(5000),
+        null)
     val lon = dataStore.lon.stateIn(viewModelScope, SharingStarted.Companion.Lazily, null)
 
     val locationMode = dataStore.locationMode
