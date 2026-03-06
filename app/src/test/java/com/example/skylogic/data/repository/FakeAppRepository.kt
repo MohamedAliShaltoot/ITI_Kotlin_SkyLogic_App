@@ -1,6 +1,5 @@
 package com.example.skylogic.data.repository
 
-
 import com.example.skylogic.data.local.alert.AlertEntity
 import com.example.skylogic.data.local.fav.FavoriteEntity
 import com.example.skylogic.data.local.forcast.CachedForecastEntity
